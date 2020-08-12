@@ -1,0 +1,25 @@
+{
+    "parameters": {
+        "textField": "Text"
+    },
+    "results": [
+        {
+            "id": 10,
+            "document": {
+                "Text": "This is the first"
+            }
+        },
+        {
+            "id": 12,
+            "document": {
+                "Text": "The second"
+            }
+        },
+        {
+            "id": 13,
+            "document": {
+                "Text": "And this is the third"
+            }
+        }
+    ]
+}
