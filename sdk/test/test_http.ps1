@@ -1,5 +1,3 @@
-# pip install $PSScriptRoot\..\jnjjobwrapper\
-# pip install $PSScriptRoot\..\jnjhttpjob\
 
 # $env:JOB_CONFIG_PATH = "C:\Source\JNJ\Repos\pqv_triage\sdk\test\config.json"
 # $env:JNJ_JOB_modBy = "3"

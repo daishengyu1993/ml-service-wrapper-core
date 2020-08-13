@@ -6,12 +6,13 @@ import os
 from threading import Thread
 
 import pandas as pd
-from jnjjobwrapper import (EnvironmentVariableServiceContext, JobRunContext,
-                           JobService)
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
+
+from jnjjobwrapper import (EnvironmentVariableServiceContext, JobRunContext,
+                           JobService)
 
 # from flask import Flask
 
@@ -72,7 +73,7 @@ class ApiInstance:
             if len(set(doc_ids)) < len(doc_ids):
                 return error(400, "A duplicate id was detected!")
 
-            req_df.set_index(pd.Index(doc_ids))
+            req_df.set_index(pd.Index(doc_ids), inplace=True)
 
         else:
             return error(405, "This endpoint only accepts JSON!")
@@ -96,7 +97,7 @@ class ApiInstance:
         return JSONResponse({"status": "Ready", "ready": True}, 200)
 
     def load(self):
-        context = EnvironmentVariableServiceContext("JNJ_JOB_")
+        context = EnvironmentVariableServiceContext("JOB_")
 
         self.job.load(context)
 
@@ -117,13 +118,40 @@ job_class_name = config["className"]
 if job_script_path is None:
     raise "The modulePath couldn't be determined!"
 
-job_script_path = os.path.join(os.path.dirname(config_path), job_script_path)
+config_directory_path = os.path.dirname(config_path)
+
+job_script_path = os.path.realpath(os.path.join(config_directory_path, job_script_path))
 
 print("Loading from script {}".format(job_script_path))
 
-spec = importlib.util.spec_from_file_location("job_module", job_script_path)
-job_module = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(job_module)
+job_script_directory_path = os.path.dirname(job_script_path)
+job_script_basename = os.path.basename(job_script_path)
+
+os.sys.path.insert(0, "/app/job")
+
+#cwd_original = os.getcwd()
+#print("Moving from {} to {} to import {}".format(cwd_original, job_script_directory_path, job_script_basename))
+#os.chdir(job_script_directory_path)
+
+job_script_module_name = os.path.splitext(job_script_basename)[0]
+
+job_module = importlib.import_module(job_script_module_name)
+
+# job_script_globals = {
+#     "__name__": job_script_module_name,
+#     "__file__": job_script_basename
+# }
+
+# with open(job_script_basename, "r") as job_script_file:
+#     job_script = job_script_file.open()
+
+# exec(job_script, job_script_globals)
+# job_module = job_script_globals
+
+# spec = importlib.util.spec_from_file_location(job_script_module_name, job_script_basename)
+# job_module = importlib.util.module_from_spec(spec)
+# spec.loader.exec_module(job_module)
+# os.chdir(cwd_original)
 
 job_type = getattr(job_module, job_class_name)
 

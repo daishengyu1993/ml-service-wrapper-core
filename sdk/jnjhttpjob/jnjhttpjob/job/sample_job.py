@@ -4,6 +4,8 @@ import time
 from jnjjobwrapper import JobRunContext, JobService, ServiceContext, run_local
 from pandas import DataFrame
 
+import sample_dal
+
 
 class SampleJob(JobService):
     def __init__(self):
@@ -25,11 +27,7 @@ class SampleJob(JobService):
         
         text_field = ctx.get_parameter_value("textField")
 
-        result = DataFrame(input_data[text_field].str.len() % self.mod_by)
-
-        result.columns = ["Result"]
-
-        return result
+        return sample_dal.process(input_data[text_field], self.mod_by)
 
     def dispose(self) -> None:
         pass
