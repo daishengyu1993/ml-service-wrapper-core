@@ -5,7 +5,7 @@ import sys
 from types import SimpleNamespace
 
 from ..job_service import JobService
-from ..service_context import ServiceContext
+from ..contexts import ServiceContext
 
 
 class EnvironmentVariableServiceContext(ServiceContext):

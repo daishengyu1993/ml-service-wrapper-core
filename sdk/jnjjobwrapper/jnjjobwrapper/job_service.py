@@ -1,8 +1,8 @@
 
 from pandas import DataFrame
 
-from .job_run_context import JobRunContext
-from .service_context import ServiceContext
+from .contexts import JobRunContext
+from .contexts import ServiceContext
 
 
 class JobService:

@@ -1,8 +1,10 @@
 
 from pandas import DataFrame
 
-from .service_context import ServiceContext
 
+class ServiceContext:
+    def get_parameter_value(self, name: str, default: str = None) -> str:
+        raise NotImplementedError()
 
 class JobRunContext:
     def get_parameter_value(self, name: str, default: str = None) -> str:

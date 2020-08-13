@@ -3,9 +3,9 @@ import json
 
 import pandas as pd
 
-from ..job_run_context import JobRunContext
+from ..contexts import JobRunContext
 from ..job_service import JobService
-from ..service_context import ServiceContext
+from ..contexts import ServiceContext
 
 
 class LocalLoadContext(ServiceContext):
