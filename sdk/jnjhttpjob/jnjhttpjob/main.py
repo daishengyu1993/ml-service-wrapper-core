@@ -1,4 +1,6 @@
-
+import asyncio
+import concurrent
+import concurrent.futures
 import importlib
 import json
 import os
@@ -11,11 +13,17 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from starlette.routing import Route
 
-from jnjjobwrapper import (EnvironmentVariableServiceContext, JobRunContext,
-                           JobService)
+import jnjjobwrapper
+import jnjjobwrapper.contexts
+import jnjjobwrapper.job_service
+import jnjjobwrapper.server
+
+# from jnjjobwrapper import (EnvironmentVariableServiceContext, JobRunContext,
+#                            JobService, load_job)
 
 
-class HttpRunContext(JobRunContext):
+
+class HttpRunContext(jnjjobwrapper.contexts.JobRunContext):
     def __init__(self, parameters: dict, df: pd.DataFrame):
         self.parameters = parameters if parameters is not None else dict()
         self.df = df
@@ -32,7 +40,7 @@ def error(status_code: int, message: str):
 
 
 class ApiInstance:
-    def __init__(self, job: JobService):
+    def __init__(self, job: jnjjobwrapper.job_service.JobService):
         self.is_loading = True
         self.job = job
 
@@ -66,7 +74,7 @@ class ApiInstance:
 
         req_ctx = HttpRunContext(parameters, req_df)
 
-        resp = self.job.get_results(req_ctx)
+        resp = self.job.process(req_ctx)
 
         resp_dict = [{"id": k, "result": v} for (k, v) in resp.to_dict("index").items()]
 
@@ -78,48 +86,26 @@ class ApiInstance:
 
         return JSONResponse({"status": "Ready", "ready": True}, 200)
 
-    def load(self):
-        context = EnvironmentVariableServiceContext("JOB_")
+    async def load(self):
+        context = jnjjobwrapper.contexts.EnvironmentVariableServiceContext("JOB_")
 
-        self.job.load(context)
+        await self.job.load(context)
 
         self.is_loading = False
 
     def begin_loading(self):
-        load_run = Thread(target=self.load, args=())
-        load_run.start()
+        loop = asyncio.get_event_loop()
+
+        def do_load():
+            loop.create_task(self.load())
+
+        loop.call_soon_threadsafe(do_load)
+        
+        # load_run = Thread(target=run, args=())
+        # load_run.start()
 
 
-config_path = os.environ.get("JOB_CONFIG_PATH", "./job/config.json")
-
-with open(config_path, "r") as config_file:
-    config = json.loads(config_file.read())
-
-job_script_path = config["modulePath"]
-job_class_name = config["className"]
-
-if job_script_path is None:
-    raise "The modulePath couldn't be determined!"
-
-config_directory_path = os.path.dirname(config_path)
-
-job_script_path = os.path.realpath(
-    os.path.join(config_directory_path, job_script_path))
-
-print("Loading from script {}".format(job_script_path))
-
-job_script_directory_path = os.path.dirname(job_script_path)
-job_script_basename = os.path.basename(job_script_path)
-
-os.sys.path.insert(0, "./job")
-
-job_script_module_name = os.path.splitext(job_script_basename)[0]
-
-job_module = importlib.import_module(job_script_module_name)
-
-job_type = getattr(job_module, job_class_name)
-
-job = job_type()
+job = jnjjobwrapper.server.get_job_instance()
 
 api = ApiInstance(job)
 

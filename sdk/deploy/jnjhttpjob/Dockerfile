@@ -10,3 +10,5 @@ ENV JOB_CONFIG_PATH=/app/job/config.json
 
 COPY ./jnjhttpjob/jnjhttpjob /app/
 
+COPY ./sample_job /app/job
+
