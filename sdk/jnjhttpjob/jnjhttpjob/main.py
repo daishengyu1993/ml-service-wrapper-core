@@ -54,9 +54,9 @@ class ApiInstance:
         self.job = job
 
     async def process(self, request: Request) -> JSONResponse:
-        content_type = request.headers().get("Content-Type", "application/json")
+        content_type = request.headers.get("Content-Type", "application/json")
 
-        if content_type.to_lower_case() == "application/json":
+        if content_type.lower() == "application/json":
             req_dict = request.json()
 
             if "records" not in req_dict:
@@ -107,6 +107,7 @@ class ApiInstance:
         load_run = Thread(target=self.load, args=())
         load_run.start()
 
+
 config_path = os.environ.get("JOB_CONFIG_PATH", "./job/config.json")
 
 with open(config_path, "r") as config_file:
@@ -120,7 +121,8 @@ if job_script_path is None:
 
 config_directory_path = os.path.dirname(config_path)
 
-job_script_path = os.path.realpath(os.path.join(config_directory_path, job_script_path))
+job_script_path = os.path.realpath(
+    os.path.join(config_directory_path, job_script_path))
 
 print("Loading from script {}".format(job_script_path))
 
@@ -131,7 +133,7 @@ os.sys.path.insert(0, "/app/job")
 
 #cwd_original = os.getcwd()
 #print("Moving from {} to {} to import {}".format(cwd_original, job_script_directory_path, job_script_basename))
-#os.chdir(job_script_directory_path)
+# os.chdir(job_script_directory_path)
 
 job_script_module_name = os.path.splitext(job_script_basename)[0]
 
