@@ -45,7 +45,7 @@ class HttpRunContext(JobRunContext):
 
 
 def error(status_code: int, message: str):
-    return (json.dumps({"error": message}), status_code)
+    return JSONResponse({"error": message}, status_code)
 
 
 class ApiInstance:
@@ -54,10 +54,11 @@ class ApiInstance:
         self.job = job
 
     async def process(self, request: Request) -> JSONResponse:
-        content_type = request.headers.get("Content-Type", "application/json")
+        content_type = "application/json"
+        # request.headers.get("Content-Type", "application/json")
 
         if content_type.lower() == "application/json":
-            req_dict = request.json()
+            req_dict = await request.json()
 
             if "records" not in req_dict:
                 return error(400, "Missing required field records!")
@@ -66,7 +67,7 @@ class ApiInstance:
             )
 
             req_df = pd.DataFrame.from_records(
-                (record["document"] for record in req_dict["records"]))
+                [record["document"] for record in req_dict["records"]])
 
             doc_ids = [record["id"] for record in req_dict["records"]]
 
@@ -74,9 +75,8 @@ class ApiInstance:
                 return error(400, "A duplicate id was detected!")
 
             req_df.set_index(pd.Index(doc_ids), inplace=True)
-
         else:
-            return error(405, "This endpoint only accepts JSON!")
+            return error(405, "This endpoint does not accept {}!".format(content_type))
 
         if self.is_loading:
             return error(409, "The model is still loading!")
@@ -85,8 +85,7 @@ class ApiInstance:
 
         resp = self.job.get_results(req_ctx)
 
-        resp_dict = [{"id": k, "result": v}
-                     for (k, v) in resp.to_dict("index")]
+        resp_dict = [{"id": k, "result": v} for (k, v) in resp.to_dict("index").items()]
 
         return JSONResponse(resp_dict)
 
