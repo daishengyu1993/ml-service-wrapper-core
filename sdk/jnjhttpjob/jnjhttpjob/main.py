@@ -14,23 +14,6 @@ from starlette.routing import Route
 from jnjjobwrapper import (EnvironmentVariableServiceContext, JobRunContext,
                            JobService)
 
-# from flask import Flask
-
-# app = Flask(__name__)
-
-# @app.route("/")
-# def hello():
-#     return "Hello World from Flask"
-
-# if __name__ == "__main__":
-#     # Only for debugging while developing
-#     app.run(host='0.0.0.0', debug=True, port=80)
-
-
-# from job.sample_job import SampleJob
-
-# print("http__main__")
-
 
 class HttpRunContext(JobRunContext):
     def __init__(self, parameters: dict, df: pd.DataFrame):
@@ -128,31 +111,11 @@ print("Loading from script {}".format(job_script_path))
 job_script_directory_path = os.path.dirname(job_script_path)
 job_script_basename = os.path.basename(job_script_path)
 
-os.sys.path.insert(0, "/app/job")
-
-#cwd_original = os.getcwd()
-#print("Moving from {} to {} to import {}".format(cwd_original, job_script_directory_path, job_script_basename))
-# os.chdir(job_script_directory_path)
+os.sys.path.insert(0, "./job")
 
 job_script_module_name = os.path.splitext(job_script_basename)[0]
 
 job_module = importlib.import_module(job_script_module_name)
-
-# job_script_globals = {
-#     "__name__": job_script_module_name,
-#     "__file__": job_script_basename
-# }
-
-# with open(job_script_basename, "r") as job_script_file:
-#     job_script = job_script_file.open()
-
-# exec(job_script, job_script_globals)
-# job_module = job_script_globals
-
-# spec = importlib.util.spec_from_file_location(job_script_module_name, job_script_basename)
-# job_module = importlib.util.module_from_spec(spec)
-# spec.loader.exec_module(job_module)
-# os.chdir(cwd_original)
 
 job_type = getattr(job_module, job_class_name)
 
