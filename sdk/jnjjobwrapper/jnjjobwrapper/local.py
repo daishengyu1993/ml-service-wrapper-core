@@ -1,16 +1,19 @@
+import asyncio
 import json
 import os
+import re
 import typing
 
 import pandas as pd
+from requests.structures import CaseInsensitiveDict
 
-from .contexts import JobRunContext, ServiceContext
+from .contexts import CollectingJobRunContext, ServiceContext
 from .job_service import JobService
 
 
 class LocalLoadContext(ServiceContext):
     def __init__(self, parameters: dict = None):
-        self.parameters = parameters if parameters is not None else dict()
+        self.parameters = CaseInsensitiveDict(parameters or dict())
 
         print("Loaded service parameters:")
         print(self.parameters)
@@ -20,55 +23,69 @@ class LocalLoadContext(ServiceContext):
         return self.parameters.get(name, default)
 
 
-class LocalRunContext(JobRunContext):
-    def __init__(self, input_files_dir: str, output_files_dir: str, index_field_names: typing.Dict[str, str] = None, parameters: dict = None):
-        self.parameters = parameters if parameters is not None else dict()
+class LocalRunContext(CollectingJobRunContext):
+    def __init__(self, input_files_dir: str, output_files_dir: str, parameters: dict = None):
+        super().__init__()
+        self.parameters = CaseInsensitiveDict(parameters or dict())
+
         self.input_files_dir = input_files_dir
-        self.index_field_names = index_field_names if index_field_names is not None else dict()
+        self.output_files_dir = output_files_dir
 
-        print("Loaded execution parameters:")
-        print(self.parameters)
-        print()
+    def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
+        if name in self.parameters:
+            return self.parameters[name]
+        
+        if not required:
+            print("Could not find optional parameter {}".format(name))
 
-        self.output_dataframes = dict()
+            return default
 
-    def get_parameter_value(self, name: str, default: str = None) -> str:
-        return self.parameters.get(name, default)
+        raise "Missing value for parameter: {}".format(name)
 
-    async def get_input_dataframe(self, name: str):
-        path = os.path.join(self.input_files_dir, name)
+    async def get_input_dataframe(self, name: str, required: bool = True):
+        name_regex = re.escape(name) + r"\.\w+"
+        
+        file_path: str = None
+        for f in os.scandir(self.input_files_dir):
+            if not re.match(name_regex, f.name):
+                continue
+ 
+            if file_path:
+                raise "Multiple files matched input dataset {}".format(name)
 
-        index_name = self.index_field_names.get(name)
+            file_path = f.path
 
-        self.df = pd.read_csv(path, index_col = index_name)
+        if file_path:
+            return pd.read_csv(file_path)
 
-        print("Loaded data:")
-        print(self.df)
-        print()
+        if required:
+            print("Could not find optional input file {} in {}".format(name, self.input_files_dir))
+
+            return None
+
+        raise "Could not find input file {} in {}".format(name, self.input_files_dir)
 
     async def set_output_dataframe(self, name: str, df: pd.DataFrame):
-        self.output_dataframes[name] = df
+        await super().set_output_dataframe(name, df)
+        
+        print("Got results for {}".format(name))
+        print(df)
+        print()
 
-    def get_output_dataframe_names(self):
-        return self.output_dataframes.keys()
+        if self.output_files_dir:
+            df.to_csv(self.output_files_dir)
     
-    def get_output_dataframe(self, name: str):
-        return self.output_dataframes.get(name)
+        
 
-async def run(job: JobService, input_file_directory: str, index_field_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, output_file_path: str = None):
+def run(job: JobService, input_file_directory: str, load_parameters: dict = None, runtime_parameters: dict = None, output_file_directory: str = None):
     load_context = LocalLoadContext(load_parameters)
 
-    run_context = LocalRunContext(input_file_directory, index_field_name, runtime_parameters)
+    run_context = LocalRunContext(input_file_directory, output_file_directory, runtime_parameters)
 
-    job.load(load_context)
+    print("Loading...")
+    asyncio.run(job.load(load_context))
 
-    results = await job.process(run_context)
+    print("Running...")
+    asyncio.run(job.process(run_context))
 
-    print("Got results:")
-    print(results)
-    print()
-
-    if output_file_path != None:
-        results.to_csv(output_file_path)
-
-    return results
+    return CaseInsensitiveDict(run_context.output_dataframes())

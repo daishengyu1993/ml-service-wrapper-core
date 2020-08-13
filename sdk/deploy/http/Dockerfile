@@ -8,7 +8,7 @@ FROM base as final
 
 ENV JOB_CONFIG_PATH=/app/job/config.json
 
-COPY ./jnjhttpjob /app/
+COPY ./http /app/
 
 COPY ./sample_job /app/job
 

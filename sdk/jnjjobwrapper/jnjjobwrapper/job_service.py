@@ -18,15 +18,10 @@ class JobService:
 
         return resp
 
-    async def dispose(self) -> types.CoroutineType:
+    def dispose(self):
         """Clean up any resources (file handles, temporary files, etc.) to gracefully shut down."""
 
-        resp = self.dispose_internal()
-
-        if inspect.iscoroutine(resp):
-            await resp
-
-        return resp
+        self.dispose_internal()
 
     async def process(self, ctx: JobRunContext) -> types.CoroutineType:
         """Run a prediction or processing job."""
@@ -47,7 +42,7 @@ class JobService:
     async def load_internal(self, ctx: ServiceContext) -> Union[types.CoroutineType, None]:
         """Initialize variables and load models."""
 
-    async def dispose_internal(self) -> Union[types.CoroutineType, None]:
+    def dispose_internal(self):
         """Clean up any resources (file handles, temporary files, etc.) to gracefully shut down."""
 
         pass
