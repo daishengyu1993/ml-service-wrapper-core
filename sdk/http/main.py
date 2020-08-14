@@ -24,12 +24,13 @@ import jnjjobwrapper.server
 def error_response(status_code: int, message: str):
     return JSONResponse({"error": message}, status_code)
 
-def bad_request_response(input_type: str, name: str, message: str):
+def bad_request_response(message: str, input_type: str = None, name: str = None, additional_details: dict = None):
     return JSONResponse({
         "error": "An invalid value was provided to {}.".format(name),
         "inputType": input_type,
         "name": name,
-        "details": message
+        "details": message,
+        "additionalInformation": additional_details
     }, 400)
 
 class HttpResponseError(RuntimeError):
@@ -39,7 +40,7 @@ class HttpResponseError(RuntimeError):
 
 class HttpJsonRunContext(jnjjobwrapper.contexts.CollectingJobRunContext):
     def __init__(self, parameters: dict, inputs: dict):
-        super()
+        super().__init__()
         self.parameters = CaseInsensitiveDict(parameters or dict())
         self.inputs = CaseInsensitiveDict(inputs or dict())
 
@@ -85,11 +86,15 @@ class ApiInstance:
         except HttpResponseError as err:
             return err.response
         except jnjjobwrapper.errors.BadParameterError as err:
-            return bad_request_response("parameter", err.name, err.message)
-        except jnjjobwrapper.errors.BadDataError as err:
-            return bad_request_response("dataset", err.name, err.message)
+            return bad_request_response(err.message, "parameter", err.name)
+        except jnjjobwrapper.errors.DatasetFieldError as err:
+            return bad_request_response(err.message, "dataset", err.name, { "field": err.field_name })
+        except jnjjobwrapper.errors.BadDatasetError as err:
+            return bad_request_response(err.message, "dataset", err.name)
+        except jnjjobwrapper.errors.BadRequestError as err:
+            return bad_request_response(err.message)
 
-        outputs_dict = dict(req_ctx.output_dataframes())
+        outputs_dict = dict(((k, v.to_dict("records")) for k, v in req_ctx.output_dataframes()))
         
         return JSONResponse({
             "outputs": outputs_dict

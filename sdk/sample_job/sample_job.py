@@ -14,7 +14,7 @@ class SampleJob(jnjjobwrapper.job_service.JobService):
     def __init__(self):
         print("TestJob constructed")
 
-    async def load_internal(self, ctx: jnjjobwrapper.contexts.ServiceContext):
+    async def load(self, ctx: jnjjobwrapper.contexts.ServiceContext):
         print("TestJob load")
 
         self.mod_by = 3
@@ -23,7 +23,7 @@ class SampleJob(jnjjobwrapper.job_service.JobService):
         
         print("TestJob loaded")
 
-    async def process_internal(self, ctx: jnjjobwrapper.contexts.JobRunContext):
+    async def process(self, ctx: jnjjobwrapper.contexts.JobRunContext):
         print("TestJob process")
 
         input_data = await ctx.get_input_dataframe("data")
