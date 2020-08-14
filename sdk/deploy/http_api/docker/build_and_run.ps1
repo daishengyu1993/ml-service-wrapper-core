@@ -1,9 +1,9 @@
 
 $imageName = "jnjhttpjob"
 
-Push-Location $PSScriptRoot\..\..;
+Push-Location $PSScriptRoot;
 Try {
-    docker build --no-cache -t $imageName -f "$PSScriptRoot\Dockerfile" .
+    .\build.ps1
 }
 Finally {
     Pop-Location
