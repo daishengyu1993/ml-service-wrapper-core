@@ -26,6 +26,14 @@ parser.add_argument("--run-params", dest="runtime_parameters", action=StoreDictK
 
 args = parser.parse_args()
 
-service, params = server.get_service_instance(args.config)
+service, config_params = server.get_service_instance(args.config)
 
+load_params = dict()
+
+if config_params:
+    load_params.update(config_params)
+
+if args.load_params:
+    load_params.update(args.load_params)
+    
 local.run(service, args.input_dir, load_parameters=args.load_params, runtime_parameters=args.runtime_parameters, output_file_directory=args.output_dir)
