@@ -5,7 +5,6 @@ import re
 import typing
 
 import pandas as pd
-from requests.structures import CaseInsensitiveDict
 
 from .contexts import CollectingJobRunContext, ServiceContext
 from .job_service import JobService
@@ -13,7 +12,7 @@ from .job_service import JobService
 
 class LocalLoadContext(ServiceContext):
     def __init__(self, parameters: dict = None):
-        self.__parameters = CaseInsensitiveDict(parameters or dict())
+        self.__parameters = parameters or dict()
 
         print("Loaded service parameters:")
         print(self.__parameters)
@@ -26,7 +25,7 @@ class LocalLoadContext(ServiceContext):
 class LocalRunContext(CollectingJobRunContext):
     def __init__(self, input_files_dir: str, output_files_dir: str, parameters: dict = None):
         super().__init__()
-        self.__parameters = CaseInsensitiveDict(parameters or dict())
+        self.__parameters = parameters or dict()
 
         self.__input_files_dir = input_files_dir
         self.__output_files_dir = output_files_dir
@@ -73,7 +72,7 @@ class LocalRunContext(CollectingJobRunContext):
         print()
 
         if self.__output_files_dir:
-            df.to_csv(self.__output_files_dir)
+            df.to_csv(os.path.join(self.__output_files_dir, name + ".csv"), index=False)
 
 def run(job: JobService, input_file_directory: str, load_parameters: dict = None, runtime_parameters: dict = None, output_file_directory: str = None):
     load_context = LocalLoadContext(load_parameters)
@@ -86,4 +85,4 @@ def run(job: JobService, input_file_directory: str, load_parameters: dict = None
     print("Running...")
     asyncio.run(job.process(run_context))
 
-    return CaseInsensitiveDict(run_context.output_dataframes())
+    return dict(run_context.output_dataframes())

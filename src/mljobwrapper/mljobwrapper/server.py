@@ -4,8 +4,6 @@ import os
 import sys
 from types import SimpleNamespace
 
-from requests.structures import CaseInsensitiveDict
-
 from .contexts import EnvironmentVariableServiceContext
 from .job_service import JobService
 
@@ -55,4 +53,4 @@ def get_job_instance(config_path: str = None) -> (JobService, dict):
 
     print("Got job: {}".format(job))
 
-    return (job, CaseInsensitiveDict(config.get("parameters", dict())))
+    return (job, config.get("parameters", dict()))

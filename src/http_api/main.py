@@ -9,17 +9,16 @@ import time
 from threading import Thread
 
 import pandas as pd
-from requests.structures import CaseInsensitiveDict
+from starlette.applications import Starlette
+from starlette.requests import Request
+from starlette.responses import JSONResponse, Response
+from starlette.routing import Route
 
 import mljobwrapper
 import mljobwrapper.contexts
 import mljobwrapper.errors
 import mljobwrapper.job_service
 import mljobwrapper.server
-from starlette.applications import Starlette
-from starlette.requests import Request
-from starlette.responses import JSONResponse, Response
-from starlette.routing import Route
 
 
 def error_response(status_code: int, message: str):
@@ -42,8 +41,8 @@ class HttpResponseError(RuntimeError):
 class HttpJsonRunContext(mljobwrapper.contexts.CollectingJobRunContext):
     def __init__(self, parameters: dict, inputs: dict):
         super().__init__()
-        self.__parameters = CaseInsensitiveDict(parameters or dict())
-        self.__inputs = CaseInsensitiveDict(inputs or dict())
+        self.__parameters = parameters or dict()
+        self.__inputs = inputs or dict()
 
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         if name not in self.__parameters:

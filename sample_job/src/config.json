@@ -1,4 +1,4 @@
 {
     "modulePath": "./sample_job.py",
-    "serviceInstanceName": "service"
+    "className": "SampleJob"
 }
