@@ -1,8 +1,8 @@
 import argparse
 import os
 
-import jnjjobwrapper
-import jnjjobwrapper.local
+import mljobwrapper
+import mljobwrapper.local
 import predict_job
 
 if __name__ == "__main__":
@@ -37,6 +37,6 @@ if __name__ == "__main__":
             "ModelsDirectory": os.path.join(root_dir, "models", "level{}".format(args.level))
         }
 
-        results = jnjjobwrapper.local.run(job, input_data_dir, load_parameters=load_parameters, output_file_directory=output_data_dir)
+        results = mljobwrapper.local.run(job, input_data_dir, load_parameters=load_parameters, output_file_directory=output_data_dir)
 
         predictions = results["Results"]

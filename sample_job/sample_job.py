@@ -4,17 +4,17 @@ import time
 
 from pandas import DataFrame
 
-import jnjjobwrapper
-import jnjjobwrapper.contexts
-import jnjjobwrapper.job_service
+import mljobwrapper
+import mljobwrapper.contexts
+import mljobwrapper.job_service
 import sample_dal
 
 
-class SampleJob(jnjjobwrapper.job_service.JobService):
+class SampleJob(mljobwrapper.job_service.JobService):
     def __init__(self):
         print("TestJob constructed")
 
-    async def load(self, ctx: jnjjobwrapper.contexts.ServiceContext):
+    async def load(self, ctx: mljobwrapper.contexts.ServiceContext):
         print("TestJob load")
 
         self.__mod_by = 3
@@ -23,7 +23,7 @@ class SampleJob(jnjjobwrapper.job_service.JobService):
         
         print("TestJob loaded")
 
-    async def process(self, ctx: jnjjobwrapper.contexts.JobRunContext):
+    async def process(self, ctx: mljobwrapper.contexts.JobRunContext):
         print("TestJob process")
 
         input_data = await ctx.get_input_dataframe("data")

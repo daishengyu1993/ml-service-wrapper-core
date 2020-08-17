@@ -3,9 +3,9 @@ FROM tiangolo/uvicorn-gunicorn-starlette:python3.8 as base
 # FROM tiangolo/uvicorn-gunicorn-machine-learning:python3.7 as base
 #RUN pip install starlette
 
-COPY ./src/jnjjobwrapper /lib/jnjjobwrapper
+COPY ./src/mljobwrapper /lib/mljobwrapper
 
-RUN pip install /lib/jnjjobwrapper
+RUN pip install /lib/mljobwrapper
 
 FROM base as final
 

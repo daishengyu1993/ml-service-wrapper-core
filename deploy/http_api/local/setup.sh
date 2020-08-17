@@ -9,6 +9,6 @@ apt install gunicorn
 
 apt install gunicorn
 
-$pythonExecutable -m pip install ./src/jnjjobwrapper
+$pythonExecutable -m pip install ./src/mljobwrapper
 $pythonExecutable -m pip install -r "./src/http_api/requirements.txt"
 $pythonExecutable -m pip install uvicorn gunicorn

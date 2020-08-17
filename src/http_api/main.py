@@ -11,11 +11,11 @@ from threading import Thread
 import pandas as pd
 from requests.structures import CaseInsensitiveDict
 
-import jnjjobwrapper
-import jnjjobwrapper.contexts
-import jnjjobwrapper.errors
-import jnjjobwrapper.job_service
-import jnjjobwrapper.server
+import mljobwrapper
+import mljobwrapper.contexts
+import mljobwrapper.errors
+import mljobwrapper.job_service
+import mljobwrapper.server
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
@@ -39,7 +39,7 @@ class HttpResponseError(RuntimeError):
         super().__init__()
         self.response = response
 
-class HttpJsonRunContext(jnjjobwrapper.contexts.CollectingJobRunContext):
+class HttpJsonRunContext(mljobwrapper.contexts.CollectingJobRunContext):
     def __init__(self, parameters: dict, inputs: dict):
         super().__init__()
         self.__parameters = CaseInsensitiveDict(parameters or dict())
@@ -85,13 +85,13 @@ class ApiInstance:
             await self.__job.process(req_ctx)
         except HttpResponseError as err:
             return err.response
-        except jnjjobwrapper.errors.BadParameterError as err:
+        except mljobwrapper.errors.BadParameterError as err:
             return bad_request_response(err.message, "parameter", err.name)
-        except jnjjobwrapper.errors.DatasetFieldError as err:
+        except mljobwrapper.errors.DatasetFieldError as err:
             return bad_request_response(err.message, "dataset", err.name, { "field": err.field_name })
-        except jnjjobwrapper.errors.BadDatasetError as err:
+        except mljobwrapper.errors.BadDatasetError as err:
             return bad_request_response(err.message, "dataset", err.name)
-        except jnjjobwrapper.errors.BadRequestError as err:
+        except mljobwrapper.errors.BadRequestError as err:
             return bad_request_response(err.message)
 
         outputs_dict = dict(((k, v.to_dict("records")) for k, v in req_ctx.output_dataframes()))
@@ -112,9 +112,9 @@ class ApiInstance:
         
     async def __do_load(self):
         print("load")
-        job, config_parameters = jnjjobwrapper.server.get_job_instance()
+        job, config_parameters = mljobwrapper.server.get_job_instance()
 
-        context = jnjjobwrapper.contexts.EnvironmentVariableServiceContext("JOB_", config_parameters)
+        context = mljobwrapper.contexts.EnvironmentVariableServiceContext("JOB_", config_parameters)
 
         print("job.load")
         await job.load(context)
@@ -138,7 +138,7 @@ class ApiInstance:
         #asyncio.to_thread()
 
     # async def __load(self):
-    #     context = jnjjobwrapper.contexts.EnvironmentVariableServiceContext("JOB_", self.__config_parameters)
+    #     context = mljobwrapper.contexts.EnvironmentVariableServiceContext("JOB_", self.__config_parameters)
 
     #     await self.__job.load(context)
 
@@ -163,7 +163,7 @@ class ApiInstance:
         # load_run = Thread(target=run, args=())
         # load_run.start()
 
-# def add_routes(routes: list, job: jnjjobwrapper.job_service.JobService, route_name: str = None):
+# def add_routes(routes: list, job: mljobwrapper.job_service.JobService, route_name: str = None):
 #     route_prefix = "/api"
 
 api = ApiInstance()
