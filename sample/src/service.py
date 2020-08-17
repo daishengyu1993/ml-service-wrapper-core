@@ -18,7 +18,7 @@ class SampleService(mlservicewrapper.services.Service):
     async def process(self, ctx: mlservicewrapper.contexts.ProcessContext):
         input_data = await ctx.get_input_dataframe("data")
 
-        if not "TextField" in input_data.columns:
+        if "TextField" not in input_data.columns:
             raise mlservicewrapper.errors.MissingDatasetFieldError("data", "TextField")
 
         result = dal.process(input_data, self.__mod_by)

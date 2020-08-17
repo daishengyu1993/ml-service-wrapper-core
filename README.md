@@ -46,6 +46,7 @@ A `ServiceContext` object will be passed to the `load` function when the service
     * Environment variables
     * Other, environment-specific key-value stores
   * Note that all parameter values are either type `str` or `None`. It is the implementation's responsibility to parse string input and handle missing values, potentially with use of the `default` parameter. Numbers will not be parsed.
+  * Service parameters are considered required unless `required` is specified as `False`, **or** a non-`None` value is passed as a `default`.
 
 ### `ProcessContext`
 
@@ -58,6 +59,7 @@ A `ProcessContext` object is passed to the `process` function, and exposes key d
   * Set the named output dataset using an existing Pandas `DataFrame`
 * `get_parameter_value(name: str, required: bool = True, default: str = None) -> str`
   * Returns execution-specific parameters, **not including** those defined in the `ServiceContext`. To use service-level parameters, store them on the service instance.
+  * Process parameters are considered required unless `required` is specified as `False`, **or** a non-`None` value is passed as a `default`.
   * _Heads up:_ most implementations will not use execution parameters. Consider using `ServiceContext` parameters instead. It's also advisable to provide sensible default values, either in-code or through `ServiceContext` parameters.
 
 Depending on the deployment environment, input and output datasets may be sourced from:
@@ -83,13 +85,6 @@ As best practice, work to validate input datasets and parameters as early as pos
 
 * `MissingDatasetFieldError(dataset_name: str, field_name: str, message: str = None)`
   * Used when a required field is missing from an input dataset. For example:
-
-    ```python
-    data = await ctx.get_input_dataframe("Input")
-
-    if not "TextField" in data.columns:
-        raise MissingDatasetFieldError("Input", "TextField")
-    ```
 * `DatasetFieldError(dataset_name: str, field_name: str, message: str = None)`
   * Used when a dataset field _is_ present, but is otherwise invalid. Use is implementation-specific, but could describe an unparsable number field, a duplicate value in an expected-unique field, or other like input inconsistencies.
 * `MissingDatasetError(dataset_name: str, message: str = None)`

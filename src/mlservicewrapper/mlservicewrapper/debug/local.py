@@ -21,7 +21,7 @@ class _LocalLoadContext(contexts.ServiceContext):
         if name in self.__parameters:
             return self.__parameters[name]
         
-        if required and not default:
+        if required and default is None:
             raise errors.MissingParameterError(name)
 
         print("Could not find optional parameter {}".format(name))
@@ -41,7 +41,7 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         if name in self.__parameters:
             return self.__parameters[name]
         
-        if required and not default:
+        if required and default is None:
             raise errors.MissingParameterError(name)
             
         print("Could not find optional parameter {}".format(name))

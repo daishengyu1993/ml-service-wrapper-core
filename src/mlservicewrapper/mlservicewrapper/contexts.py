@@ -50,7 +50,7 @@ class EnvironmentVariableServiceContext(ServiceContext):
         if name in self.__default_values:
             return self.__default_values[name]
 
-        if required and not default:
+        if required and default is None:
             raise errors.MissingParameterError(name)
 
         return default
