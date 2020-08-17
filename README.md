@@ -1,4 +1,10 @@
 
+# Installing
+
+Install directly from Git:
+
+pip install "git+https://github.com/MaJaHa95/ml-job-wrapper.git#egg=mljobwrapper&subdirectory=src/mljobwrapper"
+
 # Implementing an ML job
 
 Write a class that matches the interface defined by `JobService`:
@@ -96,7 +102,9 @@ As best practice, work to validate input datasets and parameters as early as pos
   * Base class for other errors, callable when a dataset does not match the agreed-upon contract.
 
 
-# Debugging and running the sample
+# Debugging a job
+
+Examples below use the sample job, and consequently require cloning of this repository to run.
 
 ## Write your own debug script
 
