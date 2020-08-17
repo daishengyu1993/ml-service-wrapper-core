@@ -34,25 +34,6 @@ The three functions describe the three phases of service lifetime:
 2. `process` will be called many times for each `load`, and is where data should actually be handled. See [`ProcessContext`](#processcontext) for how to process data.
 3. `dispose` _may or may not be called,_ and is optional, but should be used for cleanup tasks during service shutdown, e.g. disposal of handles or temporary files.
 
-
-## Configuration files
-
-Each service is accompanied by a simple JSON configuration file, that tells the wrapper some basic details about the service.
-
-* `modulePath`
-  * The path, _relative to the configuration file,_ where the `Service` inheritor is defined.
-* `className`
-  * The name of the `Service` inheritor itself. Note that this class must be initializable with no parameters; those should be saved for the `load` function.
-* `serviceInstanceName`
-  * In cases when you choose to instantiate the `Service` yourself, the name of the instance exposed by the module.
-  * Only used if `className` is omitted.
-* `parameters`
-  * An optional dictionary of configuration-specific key-value pairs, which should be passed via the `ServiceContext` parameters. This is useful when multiple configuration files can be used for the same `Service`.
-* `meta`
-  * Application-level metadata, not passed to the `Service`. Useful for managing configurations internally.
-
-Note that `modulePath` is required, along with _either_ `className` or `serviceInstanceName`.
-
 ## Contexts
 
 ### `ServiceContext`
@@ -113,6 +94,24 @@ As best practice, work to validate input datasets and parameters as early as pos
   * Thrown internally when a call to `get_input_dataframe` is made when no dataset exists by the name. It is unlikely implementations will benefit from calling this error directly, and should defer to the `ProcessContext` using the `required` parameter on `get_input_dataframe`.
 * `BadDatasetError(dataset_name: str, message: str = None)`
   * Base class for other errors, callable when a dataset does not match the agreed-upon contract.
+
+## Configuration files
+
+Each service is accompanied by a simple JSON configuration file, that tells the wrapper some basic details about the service.
+
+* `modulePath`
+  * The path, _relative to the configuration file,_ where the `Service` inheritor is defined.
+* `className`
+  * The name of the `Service` inheritor itself. Note that this class must be initializable with no parameters; those should be saved for the `load` function.
+* `serviceInstanceName`
+  * In cases when you choose to instantiate the `Service` yourself, the name of the instance exposed by the module.
+  * Only used if `className` is omitted.
+* `parameters`
+  * An optional dictionary of configuration-specific key-value pairs, which should be passed via the `ServiceContext` parameters. This is useful when multiple configuration files can be used for the same `Service`.
+* `meta`
+  * Application-level metadata, not passed to the `Service`. Useful for managing configurations internally.
+
+Note that `modulePath` is required, along with _either_ `className` or `serviceInstanceName`.
 
 
 # Debugging a service
