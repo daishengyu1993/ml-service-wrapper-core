@@ -76,6 +76,9 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         print()
 
         if self.__output_files_dir:
+
+            os.mkdir(self.__output_files_dir)
+
             df.to_csv(os.path.join(self.__output_files_dir, name + ".csv"), index=False)
 
 def run(service: services.Service, input_file_directory: str, load_parameters: dict = None, runtime_parameters: dict = None, output_file_directory: str = None):
