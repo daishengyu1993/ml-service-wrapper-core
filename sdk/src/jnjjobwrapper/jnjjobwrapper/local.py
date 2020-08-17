@@ -74,8 +74,6 @@ class LocalRunContext(CollectingJobRunContext):
 
         if self.__output_files_dir:
             df.to_csv(self.__output_files_dir)
-    
-        
 
 def run(job: JobService, input_file_directory: str, load_parameters: dict = None, runtime_parameters: dict = None, output_file_directory: str = None):
     load_context = LocalLoadContext(load_parameters)
