@@ -33,11 +33,6 @@ def bad_request_response(message: str, input_type: str = None, name: str = None,
         "additionalInformation": additional_details
     }, 400)
 
-class HttpResponseError(RuntimeError):
-    def __init__(self, response: Response):
-        super().__init__()
-        self.response = response
-
 class HttpJsonRunContext(mlservicewrapper.contexts.CollectingProcessContext):
     def __init__(self, parameters: dict, inputs: dict):
         super().__init__()
@@ -84,8 +79,6 @@ class ApiInstance:
 
         try:
             await self.__service.process(req_ctx)
-        except HttpResponseError as err:
-            return err.response
         except mlservicewrapper.errors.BadParameterError as err:
             return bad_request_response(err.message, "parameter", err.name)
         except mlservicewrapper.errors.DatasetFieldError as err:
