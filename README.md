@@ -17,7 +17,7 @@ class SampleService(mlservicewrapper.services.Service):
     async def load(self, ctx: mlservicewrapper.contexts.ServiceContext):
         pass
 
-    async def process(self, ctx: mlservicewrapper.contexts.ServiceRunContext):
+    async def process(self, ctx: mlservicewrapper.contexts.ProcessContext):
         pass
 ```
 
@@ -51,9 +51,9 @@ A `ServiceContext` object will be passed to the `load` function when the service
 
 Note that all values returned by `get_parameter_value` are either `str` or `None`. It is the implementation's responsibility to sensibly parse string input and handle missing values, potentially with use of the `default` parameter. Numbers will not be parsed.
 
-### `ServiceRunContext`
+### `ProcessContext`
 
-A `ServiceRunContext` object is passed to the `process` function, and exposes key details about a particular execution. It has more functions than a `ServiceContext`:
+A `ProcessContext` object is passed to the `process` function, and exposes key details about a particular execution. It has more functions than a `ServiceContext`:
 
 * `get_input_dataframe(name: str, required: bool = True)`
   * Returns a Pandas `DataFrame` object containing the named input dataset.
@@ -97,7 +97,7 @@ As best practice, work to validate input datasets and parameters as early as pos
 * `DatasetFieldError(dataset_name: str, field_name: str, message: str = None)`
   * Used when a dataset field _is_ present, but is otherwise invalid. Use is implementation-specific, but could describe an unparsable number field, a duplicate value in an expected-unique field, or other like input inconsistencies.
 * `MissingDatasetError(dataset_name: str, message: str = None)`
-  * Thrown internally when a call to `get_input_dataframe` is made when no dataset exists by the name. It is unlikely implementations will benefit from calling this error directly, and should defer to the `ServiceRunContext` using the `required` parameter on `get_input_dataframe`.
+  * Thrown internally when a call to `get_input_dataframe` is made when no dataset exists by the name. It is unlikely implementations will benefit from calling this error directly, and should defer to the `ProcessContext` using the `required` parameter on `get_input_dataframe`.
 * `BadDatasetError(dataset_name: str, message: str = None)`
   * Base class for other errors, callable when a dataset does not match the agreed-upon contract.
 

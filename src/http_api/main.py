@@ -38,7 +38,7 @@ class HttpResponseError(RuntimeError):
         super().__init__()
         self.response = response
 
-class HttpJsonRunContext(mlservicewrapper.contexts.CollectingServiceRunContext):
+class HttpJsonRunContext(mlservicewrapper.contexts.CollectingProcessContext):
     def __init__(self, parameters: dict, inputs: dict):
         super().__init__()
         self.__parameters = parameters or dict()

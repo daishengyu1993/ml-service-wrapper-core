@@ -14,7 +14,7 @@ class SampleService(mlservicewrapper.services.Service):
     async def load(self, ctx: mlservicewrapper.contexts.ServiceContext):
         self.__mod_by = int(ctx.get_parameter_value("ModBy", "2"))
 
-    async def process(self, ctx: mlservicewrapper.contexts.ServiceRunContext):
+    async def process(self, ctx: mlservicewrapper.contexts.ProcessContext):
         input_data = await ctx.get_input_dataframe("data")
 
         result = sample_dal.process(input_data["TextField"], self.__mod_by)

@@ -28,7 +28,7 @@ class LocalLoadContext(contexts.ServiceContext):
 
         raise errors.MissingParameterError(name)
 
-class LocalRunContext(contexts.CollectingServiceRunContext):
+class LocalRunContext(contexts.CollectingProcessContext):
     def __init__(self, input_files_dir: str, output_files_dir: str, parameters: dict = None):
         super().__init__()
         self.__parameters = parameters or dict()

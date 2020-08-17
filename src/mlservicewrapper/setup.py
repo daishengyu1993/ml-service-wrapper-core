@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 
 setup(
    name='mlservicewrapper',
-   version='0.1',
+   version='0.2',
    description='Configure a Python service for repeated execution',
    author='Matthew Haugen',
    author_email='mhaugen@haugenapplications.com',
