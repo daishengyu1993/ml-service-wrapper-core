@@ -6,11 +6,11 @@ from pandas import DataFrame
 
 import mljobwrapper
 import mljobwrapper.contexts
-import mljobwrapper.job_service
+import mljobwrapper.services
 import sample_dal
 
 
-class SampleJob(mljobwrapper.job_service.JobService):
+class SampleJob(mljobwrapper.services.JobService):
     async def load(self, ctx: mljobwrapper.contexts.ServiceContext):
         self.__mod_by = int(ctx.get_parameter_value("ModBy", "2"))
 

@@ -6,7 +6,7 @@ import typing
 
 import pandas as pd
 
-from .. import contexts, errors, job_service
+from .. import contexts, errors, services
 
 
 class LocalLoadContext(contexts.ServiceContext):
@@ -78,7 +78,7 @@ class LocalRunContext(contexts.CollectingJobRunContext):
         if self.__output_files_dir:
             df.to_csv(os.path.join(self.__output_files_dir, name + ".csv"), index=False)
 
-def run(job: job_service.JobService, input_file_directory: str, load_parameters: dict = None, runtime_parameters: dict = None, output_file_directory: str = None):
+def run(job: services.JobService, input_file_directory: str, load_parameters: dict = None, runtime_parameters: dict = None, output_file_directory: str = None):
     load_context = LocalLoadContext(load_parameters)
 
     run_context = LocalRunContext(input_file_directory, output_file_directory, runtime_parameters)

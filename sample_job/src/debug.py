@@ -1,8 +1,7 @@
 import os
 
 import mljobwrapper
-import mljobwrapper.local
-
+import mljobwrapper.debug
 from sample_job import SampleJob
 
 root_dir = os.path.join(os.path.dirname(__file__), '..')

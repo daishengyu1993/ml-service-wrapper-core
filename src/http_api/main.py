@@ -17,7 +17,7 @@ from starlette.routing import Route
 import mljobwrapper
 import mljobwrapper.contexts
 import mljobwrapper.errors
-import mljobwrapper.job_service
+import mljobwrapper.services
 import mljobwrapper.server
 
 
@@ -164,7 +164,7 @@ class ApiInstance:
         # load_run = Thread(target=run, args=())
         # load_run.start()
 
-# def add_routes(routes: list, job: mljobwrapper.job_service.JobService, route_name: str = None):
+# def add_routes(routes: list, job: mljobwrapper.services.JobService, route_name: str = None):
 #     route_prefix = "/api"
 
 api = ApiInstance()

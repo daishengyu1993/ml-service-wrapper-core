@@ -5,7 +5,7 @@ import sys
 from types import SimpleNamespace
 
 from .contexts import EnvironmentVariableServiceContext
-from .job_service import JobService
+from .services import JobService
 
 
 def get_job_instance(config_path: str = None) -> (JobService, dict):

@@ -11,9 +11,9 @@ Write a class that matches the interface defined by `JobService`:
 
 ```python
 import mljobwrapper
-import mljobwrapper.job_service
+import mljobwrapper.services
 
-class SampleJob(mljobwrapper.job_service.JobService):
+class SampleJob(mljobwrapper.services.JobService):
     async def load(self, ctx: mljobwrapper.contexts.ServiceContext):
         pass
 
