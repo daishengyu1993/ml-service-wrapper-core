@@ -17,7 +17,7 @@ class SampleJob(jnjjobwrapper.job_service.JobService):
     async def load(self, ctx: jnjjobwrapper.contexts.ServiceContext):
         print("TestJob load")
 
-        self.mod_by = 3
+        self.__mod_by = 3
 
         await asyncio.sleep(5)
         
@@ -30,7 +30,7 @@ class SampleJob(jnjjobwrapper.job_service.JobService):
 
         text_field = ctx.get_parameter_value("textField")
 
-        result = sample_dal.process(input_data[text_field], self.mod_by)
+        result = sample_dal.process(input_data[text_field], self.__mod_by)
 
         await ctx.set_output_dataframe("output", result)
 

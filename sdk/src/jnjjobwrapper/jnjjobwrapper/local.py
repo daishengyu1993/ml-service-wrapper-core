@@ -13,27 +13,27 @@ from .job_service import JobService
 
 class LocalLoadContext(ServiceContext):
     def __init__(self, parameters: dict = None):
-        self.parameters = CaseInsensitiveDict(parameters or dict())
+        self.__parameters = CaseInsensitiveDict(parameters or dict())
 
         print("Loaded service parameters:")
-        print(self.parameters)
+        print(self.__parameters)
         print()
             
     def get_parameter_value(self, name: str, default: str = None) -> str:
-        return self.parameters.get(name, default)
+        return self.__parameters.get(name, default)
 
 
 class LocalRunContext(CollectingJobRunContext):
     def __init__(self, input_files_dir: str, output_files_dir: str, parameters: dict = None):
         super().__init__()
-        self.parameters = CaseInsensitiveDict(parameters or dict())
+        self.__parameters = CaseInsensitiveDict(parameters or dict())
 
-        self.input_files_dir = input_files_dir
-        self.output_files_dir = output_files_dir
+        self.__input_files_dir = input_files_dir
+        self.__output_files_dir = output_files_dir
 
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
-        if name in self.parameters:
-            return self.parameters[name]
+        if name in self.__parameters:
+            return self.__parameters[name]
         
         if not required:
             print("Could not find optional parameter {}".format(name))
@@ -46,7 +46,7 @@ class LocalRunContext(CollectingJobRunContext):
         name_regex = re.escape(name) + r"\.\w+"
         
         file_path: str = None
-        for f in os.scandir(self.input_files_dir):
+        for f in os.scandir(self.__input_files_dir):
             if not re.match(name_regex, f.name):
                 continue
  
@@ -59,11 +59,11 @@ class LocalRunContext(CollectingJobRunContext):
             return pd.read_csv(file_path)
 
         if required:
-            print("Could not find optional input file {} in {}".format(name, self.input_files_dir))
+            print("Could not find optional input file {} in {}".format(name, self.__input_files_dir))
 
             return None
 
-        raise "Could not find input file {} in {}".format(name, self.input_files_dir)
+        raise "Could not find input file {} in {}".format(name, self.__input_files_dir)
 
     async def set_output_dataframe(self, name: str, df: pd.DataFrame):
         await super().set_output_dataframe(name, df)
@@ -72,8 +72,8 @@ class LocalRunContext(CollectingJobRunContext):
         print(df)
         print()
 
-        if self.output_files_dir:
-            df.to_csv(self.output_files_dir)
+        if self.__output_files_dir:
+            df.to_csv(self.__output_files_dir)
     
         
 

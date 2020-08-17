@@ -36,8 +36,9 @@ class CollectingJobRunContext(JobRunContext):
 
 
 class EnvironmentVariableServiceContext(ServiceContext):
-    def __init__(self, prefix: str):
+    def __init__(self, prefix: str, default_values: dict = None):
         self.__prefix = prefix
+        self.__default_values = default_values or dict()
     
     def get_parameter_value(self, name: str, default: str = None) -> str:
-        return os.environ.get(self.__prefix + name, default)
+        return os.environ.get(self.__prefix + name, self.__default_values.get(name, default))
