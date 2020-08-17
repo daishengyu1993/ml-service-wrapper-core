@@ -2,7 +2,7 @@ import os
 
 import mlservicewrapper
 import mlservicewrapper.debug
-from sample_service import SampleService
+from service import SampleService
 
 root_dir = os.path.join(os.path.dirname(__file__), '..')
 
