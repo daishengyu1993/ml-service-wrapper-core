@@ -3,15 +3,15 @@ from typing import Union
 
 from pandas import DataFrame
 
-from .contexts import JobRunContext, ServiceContext
+from .contexts import ServiceRunContext, ServiceContext
 
 
-class JobService:
+class Service:
     async def load(self, ctx: ServiceContext):
         """Initialize variables and load models."""
 
-    async def process(self, ctx: JobRunContext):
-        """Run a prediction or processing job."""
+    async def process(self, ctx: ServiceRunContext):
+        """Run a prediction or processing service."""
         """Implementations may make in-place modifications to any data they receive."""
 
         raise NotImplementedError()

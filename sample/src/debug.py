@@ -1,8 +1,8 @@
 import os
 
-import mljobwrapper
-import mljobwrapper.debug
-from sample_job import SampleJob
+import mlservicewrapper
+import mlservicewrapper.debug
+from sample_service import SampleService
 
 root_dir = os.path.join(os.path.dirname(__file__), '..')
 
@@ -15,7 +15,7 @@ load_parameters = {
 
 if __name__ == "__main__":
 
-    with SampleJob() as job:
-        results = mljobwrapper.debug.run(job, input_data_dir, load_parameters=load_parameters, output_file_directory=output_data_dir)
+    with SampleService() as service:
+        results = mlservicewrapper.debug.run(service, input_data_dir, load_parameters=load_parameters, output_file_directory=output_data_dir)
 
     predictions = results["Results"]

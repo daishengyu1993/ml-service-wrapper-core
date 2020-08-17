@@ -14,11 +14,11 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
-import mljobwrapper
-import mljobwrapper.contexts
-import mljobwrapper.errors
-import mljobwrapper.services
-import mljobwrapper.server
+import mlservicewrapper
+import mlservicewrapper.contexts
+import mlservicewrapper.errors
+import mlservicewrapper.services
+import mlservicewrapper.server
 
 
 def error_response(status_code: int, message: str):
@@ -38,7 +38,7 @@ class HttpResponseError(RuntimeError):
         super().__init__()
         self.response = response
 
-class HttpJsonRunContext(mljobwrapper.contexts.CollectingJobRunContext):
+class HttpJsonRunContext(mlservicewrapper.contexts.CollectingServiceRunContext):
     def __init__(self, parameters: dict, inputs: dict):
         super().__init__()
         self.__parameters = parameters or dict()
@@ -49,7 +49,7 @@ class HttpJsonRunContext(mljobwrapper.contexts.CollectingJobRunContext):
             return self.__parameters[name]
 
         if required:
-            raise mljobwrapper.errors.MissingParameterError(name)
+            raise mlservicewrapper.errors.MissingParameterError(name)
 
         return default
     
@@ -59,7 +59,7 @@ class HttpJsonRunContext(mljobwrapper.contexts.CollectingJobRunContext):
             return pd.DataFrame.from_records(self.__inputs[name])
 
         if required:
-            raise mljobwrapper.errors.MissingDatasetError(name)
+            raise mlservicewrapper.errors.MissingDatasetError(name)
 
         return None
 
@@ -83,16 +83,16 @@ class ApiInstance:
             return error_response(409, "The model is still loading!")
 
         try:
-            await self.__job.process(req_ctx)
+            await self.__service.process(req_ctx)
         except HttpResponseError as err:
             return err.response
-        except mljobwrapper.errors.BadParameterError as err:
+        except mlservicewrapper.errors.BadParameterError as err:
             return bad_request_response(err.message, "parameter", err.name)
-        except mljobwrapper.errors.DatasetFieldError as err:
+        except mlservicewrapper.errors.DatasetFieldError as err:
             return bad_request_response(err.message, "dataset", err.name, { "field": err.field_name })
-        except mljobwrapper.errors.BadDatasetError as err:
+        except mlservicewrapper.errors.BadDatasetError as err:
             return bad_request_response(err.message, "dataset", err.name)
-        except mljobwrapper.errors.BadRequestError as err:
+        except mlservicewrapper.errors.BadRequestError as err:
             return bad_request_response(err.message)
 
         outputs_dict = dict(((k, v.to_dict("records")) for k, v in req_ctx.output_dataframes()))
@@ -109,18 +109,18 @@ class ApiInstance:
 
     def stop(self):
         if not self.__is_loading:
-            self.__job.dispose()
+            self.__service.dispose()
         
     async def __do_load(self):
         print("load")
-        job, config_parameters = mljobwrapper.server.get_job_instance()
+        service, config_parameters = mlservicewrapper.server.get_service_instance()
 
-        context = mljobwrapper.contexts.EnvironmentVariableServiceContext("JOB_", config_parameters)
+        context = mlservicewrapper.contexts.EnvironmentVariableServiceContext("SERVICE_", config_parameters)
 
-        print("job.load")
-        await job.load(context)
+        print("service.load")
+        await service.load(context)
 
-        self.__job = job
+        self.__service = service
 
         self.__is_loading = False
         print("done load")
@@ -139,9 +139,9 @@ class ApiInstance:
         #asyncio.to_thread()
 
     # async def __load(self):
-    #     context = mljobwrapper.contexts.EnvironmentVariableServiceContext("JOB_", self.__config_parameters)
+    #     context = mlservicewrapper.contexts.EnvironmentVariableServiceContext("SERVICE_", self.__config_parameters)
 
-    #     await self.__job.load(context)
+    #     await self.__service.load(context)
 
     #     self.__is_loading = False
         
@@ -164,7 +164,7 @@ class ApiInstance:
         # load_run = Thread(target=run, args=())
         # load_run.start()
 
-# def add_routes(routes: list, job: mljobwrapper.services.JobService, route_name: str = None):
+# def add_routes(routes: list, service: mlservicewrapper.services.Service, route_name: str = None):
 #     route_prefix = "/api"
 
 api = ApiInstance()

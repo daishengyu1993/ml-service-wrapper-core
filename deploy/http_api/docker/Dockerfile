@@ -3,15 +3,15 @@ FROM tiangolo/uvicorn-gunicorn-starlette:python3.8 as base
 # FROM tiangolo/uvicorn-gunicorn-machine-learning:python3.7 as base
 #RUN pip install starlette
 
-COPY ./src/mljobwrapper /lib/mljobwrapper
+COPY ./src/mlservicewrapper /lib/mlservicewrapper
 
-RUN pip install /lib/mljobwrapper
+RUN pip install /lib/mlservicewrapper
 
 FROM base as final
 
-ENV JOB_CONFIG_PATH=/app/job/config.json
+ENV SERVICE_CONFIG_PATH=/app/service/config.json
 
 COPY ./src/http_api /app/
 
-COPY ./sample_job /app/job
+COPY ./sample_service /app/service
 

@@ -12,7 +12,7 @@ class ServiceContext:
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         raise NotImplementedError()
 
-class JobRunContext:
+class ServiceRunContext:
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         raise NotImplementedError()
     
@@ -22,7 +22,7 @@ class JobRunContext:
     def set_output_dataframe(self, name: str, df: pd.DataFrame) -> types.CoroutineType:
         raise NotImplementedError()
 
-class CollectingJobRunContext(JobRunContext):
+class CollectingServiceRunContext(ServiceRunContext):
     def __init__(self):
         super()
         self.__output_dataframes = dict()

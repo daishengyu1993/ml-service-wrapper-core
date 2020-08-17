@@ -1,5 +1,5 @@
 
-$imageName = "mlhttpjob"
+$imageName = "mlhttpservice"
 
 Push-Location $PSScriptRoot;
 Try {

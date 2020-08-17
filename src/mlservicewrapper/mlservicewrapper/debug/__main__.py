@@ -14,9 +14,9 @@ class StoreDictKeyPair(argparse.Action):
             my_dict[k] = v
         setattr(namespace, self.dest, my_dict)
 
-parser = argparse.ArgumentParser(description='Locally debug.', prog = "mljobwrapper.debug")
+parser = argparse.ArgumentParser(description='Locally debug.', prog = "mlservicewrapper.debug")
 parser.add_argument(
-    '--config', help='Path to job configuration file', required=True)
+    '--config', help='Path to service configuration file', required=True)
 parser.add_argument('--input-dir', dest='input_dir',
                     help='Path to input directory', required=True)
 parser.add_argument('--output-dir', dest='output_dir',
@@ -26,6 +26,6 @@ parser.add_argument("--run-params", dest="runtime_parameters", action=StoreDictK
 
 args = parser.parse_args()
 
-job, params = server.get_job_instance(args.config)
+service, params = server.get_service_instance(args.config)
 
-local.run(job, args.input_dir, load_parameters=args.load_params, runtime_parameters=args.runtime_parameters, output_file_directory=args.output_dir)
+local.run(service, args.input_dir, load_parameters=args.load_params, runtime_parameters=args.runtime_parameters, output_file_directory=args.output_dir)
