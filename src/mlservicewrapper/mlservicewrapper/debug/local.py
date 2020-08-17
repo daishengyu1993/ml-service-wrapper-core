@@ -21,12 +21,13 @@ class _LocalLoadContext(contexts.ServiceContext):
         if name in self.__parameters:
             return self.__parameters[name]
         
-        if not required:
-            print("Could not find optional parameter {}".format(name))
+        if required and not default:
+            raise errors.MissingParameterError(name)
 
-            return default
+        print("Could not find optional parameter {}".format(name))
 
-        raise errors.MissingParameterError(name)
+        return default
+
 
 class _LocalRunContext(contexts.CollectingProcessContext):
     def __init__(self, input_files_dir: str, output_files_dir: str, parameters: dict = None):
@@ -40,7 +41,7 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         if name in self.__parameters:
             return self.__parameters[name]
         
-        if required:
+        if required and not default:
             raise errors.MissingParameterError(name)
             
         print("Could not find optional parameter {}".format(name))

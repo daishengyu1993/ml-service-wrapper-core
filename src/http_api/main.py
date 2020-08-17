@@ -48,7 +48,7 @@ class HttpJsonRunContext(mlservicewrapper.contexts.CollectingProcessContext):
         if name in self.__parameters:
             return self.__parameters[name]
 
-        if required:
+        if required and not default:
             raise mlservicewrapper.errors.MissingParameterError(name)
 
         return default
