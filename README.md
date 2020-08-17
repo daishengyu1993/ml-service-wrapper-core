@@ -38,12 +38,14 @@ The three functions describe the three phases of service lifetime:
 
 ### `ServiceContext`
 
-A `ServiceContext` object will be passed to the `load` function when the service is first initialized. It exposes a single function, `get_parameter_value(name: str, default: str = None)`, which can be used to get a parameter from the environment. These parameters may be sourced from:
-* The configuration file (using the `parameters` property), 
-* Environment variables
-* Other, environment-specific key-value stores
+A `ServiceContext` object will be passed to the `load` function when the service is first initialized. It exposes a single function:
 
-Note that all values returned by `get_parameter_value` are either `str` or `None`. It is the implementation's responsibility to sensibly parse string input and handle missing values, potentially with use of the `default` parameter. Numbers will not be parsed.
+* `get_parameter_value(name: str, required: bool = True, default: str = None)`
+  * Used to get a parameter from the environment. These parameters may be sourced from:
+    * A configuration file (using the `parameters` property)
+    * Environment variables
+    * Other, environment-specific key-value stores
+  * Note that all parameter values are either type `str` or `None`. It is the implementation's responsibility to parse string input and handle missing values, potentially with use of the `default` parameter. Numbers will not be parsed.
 
 ### `ProcessContext`
 
@@ -61,8 +63,8 @@ A `ProcessContext` object is passed to the `process` function, and exposes key d
 Depending on the deployment environment, input and output datasets may be sourced from:
 * Local CSV files,
 * SQL tables or queries,
-* JSON documents or request bodies,
-* Or other sources...
+* JSON documents or request bodies, or
+* Other sources...
 
 ## Errors
 
