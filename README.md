@@ -3,7 +3,9 @@
 
 Install directly from Git:
 
+```bash
 pip install "git+https://github.com/MaJaHa95/ml-service-wrapper.git#egg=mlservicewrapper&subdirectory=src/mlservicewrapper"
+```
 
 # Implementing an ML service
 
