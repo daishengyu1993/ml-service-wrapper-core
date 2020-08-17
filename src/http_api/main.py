@@ -45,22 +45,24 @@ class HttpJsonRunContext(mljobwrapper.contexts.CollectingJobRunContext):
         self.__inputs = inputs or dict()
 
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
-        if name not in self.__parameters:
-            if required:
-                raise HttpResponseError(error_response(400, "Required parameter '{}' was not found!".format(required)))
-            else:
-                return default
-        
-        return self.__parameters[name]
+        if name in self.__parameters:
+            return self.__parameters[name]
+
+        if required:
+            raise mljobwrapper.errors.MissingParameterError(name)
+
+        return default
+    
 
     async def get_input_dataframe(self, name: str, required: bool = True):
-        if name not in self.__inputs:
-            if required:
-                raise HttpResponseError(error_response(400, "Required input data '{}' was not found!".format(required)))
-            else:
-                return None
+        if name in self.__inputs:
+            return pd.DataFrame.from_records(self.__inputs[name])
 
-        return pd.DataFrame.from_records(self.__inputs[name])
+        if required:
+            raise mljobwrapper.errors.MissingDatasetError(name)
+
+        return None
+
 
 class ApiInstance:
     def __init__(self):

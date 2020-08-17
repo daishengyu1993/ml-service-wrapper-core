@@ -1,4 +1,3 @@
-import argparse
 import os
 
 import mljobwrapper
@@ -11,7 +10,7 @@ input_data_dir = os.path.join(root_dir, 'data', 'input')
 output_data_dir = os.path.join(root_dir, 'data', 'output')
 
 load_parameters = {
-    "ModBy": "100"
+    "ModBy": "3"
 }
 
 if __name__ == "__main__":

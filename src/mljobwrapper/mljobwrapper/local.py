@@ -6,6 +6,7 @@ import typing
 
 import pandas as pd
 
+from . import errors
 from .contexts import CollectingJobRunContext, ServiceContext
 from .job_service import JobService
 
@@ -18,9 +19,16 @@ class LocalLoadContext(ServiceContext):
         print(self.__parameters)
         print()
             
-    def get_parameter_value(self, name: str, default: str = None) -> str:
-        return self.__parameters.get(name, default)
+    def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
+        if name in self.__parameters:
+            return self.__parameters[name]
+        
+        if not required:
+            print("Could not find optional parameter {}".format(name))
 
+            return default
+
+        raise errors.MissingParameterError(name)
 
 class LocalRunContext(CollectingJobRunContext):
     def __init__(self, input_files_dir: str, output_files_dir: str, parameters: dict = None):
@@ -34,12 +42,12 @@ class LocalRunContext(CollectingJobRunContext):
         if name in self.__parameters:
             return self.__parameters[name]
         
-        if not required:
-            print("Could not find optional parameter {}".format(name))
+        if required:
+            raise errors.MissingParameterError(name)
+            
+        print("Could not find optional parameter {}".format(name))
 
-            return default
-
-        raise "Missing value for parameter: {}".format(name)
+        return default
 
     async def get_input_dataframe(self, name: str, required: bool = True):
         name_regex = re.escape(name) + r"\.\w+"
@@ -58,11 +66,9 @@ class LocalRunContext(CollectingJobRunContext):
             return pd.read_csv(file_path)
 
         if required:
-            print("Could not find optional input file {} in {}".format(name, self.__input_files_dir))
+            raise errors.MissingDatasetError(name)
 
-            return None
-
-        raise "Could not find input file {} in {}".format(name, self.__input_files_dir)
+        return None
 
     async def set_output_dataframe(self, name: str, df: pd.DataFrame):
         await super().set_output_dataframe(name, df)

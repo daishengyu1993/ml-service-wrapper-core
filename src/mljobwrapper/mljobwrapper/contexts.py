@@ -5,9 +5,11 @@ import typing
 
 import pandas as pd
 
+from . import errors
+
 
 class ServiceContext:
-    def get_parameter_value(self, name: str, default: str = None) -> str:
+    def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         raise NotImplementedError()
 
 class JobRunContext:
@@ -40,5 +42,15 @@ class EnvironmentVariableServiceContext(ServiceContext):
         self.__prefix = prefix
         self.__default_values = default_values or dict()
     
-    def get_parameter_value(self, name: str, default: str = None) -> str:
-        return os.environ.get(self.__prefix + name, self.__default_values.get(name, default))
+    def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
+        ev = os.environ.get(self.__prefix + name)
+        if ev:
+            return ev
+
+        if name in self.__default_values:
+            return self.__default_values[name]
+
+        if required:
+            raise errors.MissingParameterError(name)
+
+        return default
