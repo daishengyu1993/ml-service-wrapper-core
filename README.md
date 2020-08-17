@@ -43,10 +43,13 @@ Each service is accompanied by a simple JSON configuration file, that tells the 
   * The name of the `Service` inheritor itself. Note that this class must be initializable with no parameters; those should be saved for the `load` function.
 * `serviceInstanceName`
   * In cases when you choose to instantiate the `Service` yourself, the name of the instance exposed by the module.
+  * Only used if `className` is omitted.
 * `parameters`
   * An optional dictionary of configuration-specific key-value pairs, which should be passed via the `ServiceContext` parameters. This is useful when multiple configuration files can be used for the same `Service`.
 * `meta`
   * Application-level metadata, not passed to the `Service`. Useful for managing configurations internally.
+
+Note that `modulePath` is required, along with _either_ `className` or `serviceInstanceName`.
 
 ## Contexts
 
