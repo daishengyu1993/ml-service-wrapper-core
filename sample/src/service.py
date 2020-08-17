@@ -23,4 +23,4 @@ class SampleService(mlservicewrapper.services.Service):
 
         result = dal.process(input_data, self.__mod_by)
 
-        await ctx.set_output_dataframe("Results", result)
+        await ctx.set_output_dataframe("results", result)
