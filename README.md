@@ -21,11 +21,17 @@ class SampleService(mlservicewrapper.services.Service):
 
     async def process(self, ctx: mlservicewrapper.contexts.ProcessContext):
         pass
+
+    def dispose(self):
+        pass
 ```
 
-Implement the `load` function to load models into memory and do necessary pre-work. It makes sense to parse and store service context parameters in this function, as they won't be accessible later.
+The three functions describe the three phases of service lifetime:
 
-The `process` function will be called many times for each `load`, and is where data should actually be handled.
+1. `load` is called when the service is first initializing, and should load models into memory and do necessary pre-work. It makes sense to parse and store [#servicecontext](`ServiceContext`) parameters in this function, as they won't be accessible later.
+2. `process` will be called many times for each `load`, and is where data should actually be handled. See [#processcontext](`ProcessContext`) for how to process data.
+3. `dispose` _may or may not be called,_ and is optional, but should be used for cleanup tasks during service shutdown, e.g. disposal of handles or temporary files.
+
 
 ## Configuration files
 

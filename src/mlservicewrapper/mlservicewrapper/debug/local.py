@@ -9,7 +9,7 @@ import pandas as pd
 from .. import contexts, errors, services
 
 
-class LocalLoadContext(contexts.ServiceContext):
+class _LocalLoadContext(contexts.ServiceContext):
     def __init__(self, parameters: dict = None):
         self.__parameters = parameters or dict()
 
@@ -28,7 +28,7 @@ class LocalLoadContext(contexts.ServiceContext):
 
         raise errors.MissingParameterError(name)
 
-class LocalRunContext(contexts.CollectingProcessContext):
+class _LocalRunContext(contexts.CollectingProcessContext):
     def __init__(self, input_files_dir: str, output_files_dir: str, parameters: dict = None):
         super().__init__()
         self.__parameters = parameters or dict()
@@ -79,9 +79,9 @@ class LocalRunContext(contexts.CollectingProcessContext):
             df.to_csv(os.path.join(self.__output_files_dir, name + ".csv"), index=False)
 
 def run(service: services.Service, input_file_directory: str, load_parameters: dict = None, runtime_parameters: dict = None, output_file_directory: str = None):
-    load_context = LocalLoadContext(load_parameters)
+    load_context = _LocalLoadContext(load_parameters)
 
-    run_context = LocalRunContext(input_file_directory, output_file_directory, runtime_parameters)
+    run_context = _LocalRunContext(input_file_directory, output_file_directory, runtime_parameters)
 
     print("Loading...")
     asyncio.run(service.load(load_context))
