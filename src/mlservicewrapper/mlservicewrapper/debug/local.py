@@ -76,8 +76,7 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         print()
 
         if self.__output_files_dir:
-
-            os.mkdir(self.__output_files_dir)
+            os.makedirs(self.__output_files_dir, exist_ok=True)
 
             df.to_csv(os.path.join(self.__output_files_dir, name + ".csv"), index=False)
 
