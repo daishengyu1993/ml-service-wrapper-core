@@ -105,7 +105,7 @@ As best practice, work to validate input datasets and parameters as early as pos
     data = await ctx.get_input_dataframe("Input")
 
     if not "TextField" in data.columns:
-        raise jnjservicewrapper.errors.MissingDatasetFieldError("Input", "TextField")
+        raise MissingDatasetFieldError("Input", "TextField")
     ```
 * `DatasetFieldError(dataset_name: str, field_name: str, message: str = None)`
   * Used when a dataset field _is_ present, but is otherwise invalid. Use is implementation-specific, but could describe an unparsable number field, a duplicate value in an expected-unique field, or other like input inconsistencies.
