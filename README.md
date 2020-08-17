@@ -1,4 +1,6 @@
 
+![Release](https://github.com/MaJaHa95/ml-service-wrapper/workflows/Create%20Release/badge.svg)
+
 # Installing
 
 Install directly from Git:
