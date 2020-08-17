@@ -24,13 +24,17 @@ jobs:
         python -m pip install --upgrade pip
         pip install setuptools wheel
 
-    - name: Build and publish
+    - id: dist
+      name: Build and publish
       working-directory: ./src/mlservicewrapper/
       run: |
         python setup.py sdist bdist_wheel
 
-        mostRecent=`ls -Art ./dist | tail -n 1`
-        echo "::set-output name=dist_tarball::$mostRecent"
+        distPath=`realpath ./dist`
+
+        mostRecentTarball=`ls -Art "$distPath" | grep -G ".*\.tar\.gz" | tail -n 1`
+        echo "::set-output name=dist_tarball_name::$mostRecentTarball"
+        echo "::set-output name=dist_tarball_path::${distPath}/${mostRecentTarball}"
         
     - name: Create Release
       id: create_release
@@ -50,7 +54,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
-        asset_path: ./dist/mlservicewrapper-${{ github.ref }}.tar.gz
-        asset_name: mlservicewrapper-${{ github.ref }}.tar.gz
+        asset_path: ${{ steps.dist.outputs.dist_tarball_path }}
+        asset_name: ${{ steps.dist.outputs.dist_tarball_name }}
         asset_content_type: application/gzip
         
