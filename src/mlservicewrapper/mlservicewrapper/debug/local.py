@@ -78,6 +78,16 @@ def get_input_path(dir_path: str, name: str):
 
     return file_path
 
+def get_input_dataframe(dir_path: str, name: str):
+    contexts.NameValidator.raise_if_invalid(name)
+    
+    file_path = get_input_path(dir_path, name)
+
+    if file_path:
+        return pd.read_csv(file_path)
+
+    return None
+
 class _LocalRunContext(contexts.CollectingProcessContext):
     def __init__(self, input_files_dir: str, output_files_dir: str = None, parameters: dict = None):
         super().__init__()
@@ -102,15 +112,12 @@ class _LocalRunContext(contexts.CollectingProcessContext):
     async def get_input_dataframe(self, name: str, required: bool = True):
         contexts.NameValidator.raise_if_invalid(name)
         
-        file_path = get_input_path(self.__input_files_dir, name)
-
-        if file_path:
-            return pd.read_csv(file_path)
-
-        if required:
+        df = get_input_dataframe(self.__input_files_dir, name)
+        
+        if required and df is None:
             raise errors.MissingDatasetError(name)
 
-        return None
+        return df
 
     async def set_output_dataframe(self, name: str, df: pd.DataFrame):
         contexts.NameValidator.raise_if_invalid(name)
@@ -149,9 +156,32 @@ class _LocalDataFrameRunContext(contexts.ProcessContext):
     def output_dataframes(self):
         return self.__base_ctx.output_dataframes()
 
-    
+async def _perform_accuracy_assessment(ctx: contexts.CollectingProcessContext, specs: dict):
 
-def run(service: typing.Union[services.Service, typing.Callable], input_file_directory: str, output_file_directory: str = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None):
+    for k, v in specs.items():
+        i = k.split(".")
+        o = v.split(".")
+
+        input_df = await ctx.get_input_dataframe(i[0], required=True)
+        output_df = ctx.get_output_dataframe(o[0])
+
+        input_field = input_df[i[1]]
+        input_field.name = "Expected"
+
+        output_field = output_df[o[1]]
+        output_field.name = "Actual"
+
+        joined = output_field.to_frame().join(input_field, how="inner")
+
+        joined["Result"] = joined["Actual"] == joined["Expected"]
+
+        count_total = len(joined.index)
+        count_correct = joined["Result"].values.sum()
+
+        print("Accuracy ({} to {}): {} of {} ({})".format(k, v, count_correct, count_total, count_correct / count_total))
+
+
+async def run_async(service: typing.Union[services.Service, typing.Callable], input_file_directory: str, output_file_directory: str = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None):
     if callable(service):
         service = service()
         initialized_service = True
@@ -160,12 +190,10 @@ def run(service: typing.Union[services.Service, typing.Callable], input_file_dir
     
     load_context = _LocalLoadContext(load_parameters)
 
-    loop = asyncio.get_event_loop()
-
     if hasattr(service, 'load'):
         print("Loading...")
         s = time.perf_counter()
-        loop.run_until_complete(service.load(load_context))
+        await service.load(load_context)
         e = time.perf_counter()
 
         load_time = e - s
@@ -189,14 +217,14 @@ def run(service: typing.Union[services.Service, typing.Callable], input_file_dir
             row_run_context = _LocalDataFrameRunContext(rdf, split_dataset_name, run_context)
 
             s = time.perf_counter()
-            loop.run_until_complete(service.process(row_run_context))
+            await service.process(row_run_context)
             e = time.perf_counter()
 
             times.append(e - s)
     else:
 
         s = time.perf_counter()
-        loop.run_until_complete(service.process(run_context))
+        await service.process(run_context)
         e = time.perf_counter()
 
         times.append(e - s)
@@ -217,4 +245,15 @@ def run(service: typing.Union[services.Service, typing.Callable], input_file_dir
     if initialized_service and hasattr(service, 'dispose'):
         service.dispose()
     
-    return dict(run_context.output_dataframes())
+    result = dict(run_context.output_dataframes())
+
+    if assess_accuracy is not None:
+        await _perform_accuracy_assessment(run_context, assess_accuracy)
+
+    return result
+
+def run(service: typing.Union[services.Service, typing.Callable], input_file_directory: str, output_file_directory: str = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None):
+
+    loop = asyncio.get_event_loop()
+
+    loop.run_until_complete(run_async(service, input_file_directory, output_file_directory, split_dataset_name, load_parameters, runtime_parameters, assess_accuracy))
