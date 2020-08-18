@@ -18,6 +18,8 @@ class _LocalLoadContext(contexts.ServiceContext):
         print()
             
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
+        contexts.NameValidator.raise_if_invalid(name)
+        
         if name in self.__parameters:
             return self.__parameters[name]
         
@@ -38,6 +40,8 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         self.__output_files_dir = output_files_dir
 
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
+        contexts.NameValidator.raise_if_invalid(name)
+        
         if name in self.__parameters:
             return self.__parameters[name]
         

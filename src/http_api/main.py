@@ -20,7 +20,6 @@ import mlservicewrapper.errors
 import mlservicewrapper.services
 import mlservicewrapper.server
 
-
 def error_response(status_code: int, message: str):
     return JSONResponse({"error": message}, status_code)
 
@@ -40,6 +39,8 @@ class HttpJsonRunContext(mlservicewrapper.contexts.CollectingProcessContext):
         self.__inputs = inputs or dict()
 
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
+        mlservicewrapper.contexts.NameValidator.raise_if_invalid(name)
+
         if name in self.__parameters:
             return self.__parameters[name]
 
