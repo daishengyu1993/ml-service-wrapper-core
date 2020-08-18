@@ -126,7 +126,7 @@ Examples below use the sample service, and consequently require cloning of this 
 
 ## Write your own debug script
 
-See `./sample_service/src/debug.py` for an example.
+See `./sample/1_simple/src/debug.py` for an example.
 
 ## Test end-to-end using configuration file
 
@@ -134,8 +134,8 @@ Call the debug module directly:
 
 ```bash
 python -m mlservicewrapper.debug \
-    --config "./sample_service/src/config.json" \
-    --input-dir "./sample_service/data/input" \
+    --config "./sample/1_simple/src/config.json" \
+    --input-dir "./sample/1_simple/data/input" \
     --load-params ModBy=3
 ```
 
@@ -147,8 +147,8 @@ This is meant to simulate a non-batching HTTP client.
 
 ```bash
 python -m mlservicewrapper.debug \
-    --config "./sample_service/src/config.json" \
-    --input-dir "./sample_service/data/input" \
+    --config "./sample/1_simple/src/config.json" \
+    --input-dir "./sample/1_simple/data/input" \
     --load-params ModBy=3
     --split-dataset-for-perf Data
 ```

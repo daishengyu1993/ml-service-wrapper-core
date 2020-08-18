@@ -1,6 +1,6 @@
 
 if [ -z $SERVICE_CONFIG_PATH ]; then
-    export SERVICE_CONFIG_PATH="../../../sample_service/config.json"
+    export SERVICE_CONFIG_PATH="../../../sample/1_simple/config.json"
 fi
 
 if [ -z $1 ]; then

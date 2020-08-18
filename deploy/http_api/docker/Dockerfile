@@ -13,5 +13,5 @@ ENV SERVICE_CONFIG_PATH=/app/service/config.json
 
 COPY ./src/http_api /app/
 
-COPY ./sample_service /app/service
+COPY ./sample/1_simple /app/service
 
