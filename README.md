@@ -68,20 +68,20 @@ Depending on the deployment environment, input and output datasets may be source
 * JSON documents or request bodies, or
 * Other sources...
 
-## Errors
+## Validation
 
 Validating input and raising appropriate errors helps callers understand usage of the ML service. Some built-in errors may have special behaviors in supporting environments. Use the one that most specifically describes the problem.
 
 As best practice, work to validate input datasets and parameters as early as possible. For example, test that all required categorical fields are present _before_ performing work to preprocess text ones.
 
-### Parameter Validation
+### Parameters
 
 * `MissingParameterError(name: str, message: str = None)`
   * Used internally when a parameter is requested via the `get_parameter_value` function, but cannot be found on the request. Similarly to the `MissingDatasetError`, logic is likely best left to the `required` parameter on that function.
 * `BadParameterError(name: str, message: str = None)`
   * Raise for all other parameter validation errors, e.g. when a string is not parsable.
 
-### Dataset Validation
+### Datasets
 
 * `MissingDatasetFieldError(dataset_name: str, field_name: str, message: str = None)`
   * Used when a required field is missing from an input dataset. For example:
@@ -110,6 +110,15 @@ Each service is accompanied by a simple JSON configuration file, that tells the 
 
 Note that `modulePath` is required, along with _either_ `className` or `serviceInstanceName`.
 
+## Naming Conventions
+
+By nature of its configurability, external type-checking is not possible. [Validation](#validation) can help to identify errors, but only at runtime. As consequence, a consistent naming schema is important to reducing unnecessary cycles.
+
+Follow simple rules when naming parameters and datasets:
+* Use Pascal Case (e.g. `MaxValue`)
+* Use only letters and numbers
+* Be concise, but descriptive
+* Be consistent with casing
 
 # Debugging a service
 
