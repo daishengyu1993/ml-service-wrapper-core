@@ -138,3 +138,17 @@ python -m mlservicewrapper.debug \
     --input-dir "./sample_service/data/input" \
     --load-params ModBy=3
 ```
+
+# Performance evaluation
+
+Call the debug module with `--split-dataset-for-perf <dataset name>` to perform timing. The named dataset, sourced from the input directory, will be split into individual rows, and passed independently to the process context. Timing information will be printed after execution completes.
+
+This is meant to simulate a non-batching HTTP client.
+
+```bash
+python -m mlservicewrapper.debug \
+    --config "./sample_service/src/config.json" \
+    --input-dir "./sample_service/data/input" \
+    --load-params ModBy=3
+    --split-dataset-for-perf Data
+```
