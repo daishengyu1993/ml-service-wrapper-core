@@ -64,7 +64,7 @@ class ApiInstance:
     def __init__(self):
         self.__is_loading = True
 
-    async def process(self, request: Request) -> Response:
+    async def process_batch(self, request: Request) -> Response:
         content_type = "application/json"
         # request.headers.get("Content-Type", "application/json")
 
@@ -165,7 +165,7 @@ class ApiInstance:
 api = ApiInstance()
 
 routes = [
-    Route("/api/process/batch", endpoint=api.process, methods=["POST"]),
+    Route("/api/process/batch", endpoint=api.process_batch, methods=["POST"]),
     Route("/api/status", endpoint=api.get_status, methods=["GET"])
 ]
 
