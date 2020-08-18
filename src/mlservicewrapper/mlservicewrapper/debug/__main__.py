@@ -19,6 +19,8 @@ parser.add_argument(
     '--config', help='Path to service configuration file', required=True)
 parser.add_argument('--input-dir', dest='input_dir',
                     help='Path to input directory', required=True)
+parser.add_argument('--split-dataset-for-perf', dest='split_dataset_name',
+                    help='Input dataset to split for performance evaluation.')
 parser.add_argument('--output-dir', dest='output_dir',
                     help='Path to input directory')
 parser.add_argument("--load-params", dest="load_params", action=StoreDictKeyPair, metavar="KEY1=VAL1,KEY2=VAL2...")
@@ -36,4 +38,11 @@ if config_params:
 if args.load_params:
     load_params.update(args.load_params)
     
-local.run(service, args.input_dir, load_parameters=args.load_params, runtime_parameters=args.runtime_parameters, output_file_directory=args.output_dir)
+local.run(
+    service,
+    args.input_dir,
+    split_dataset_name=args.split_dataset_name,
+    load_parameters=args.load_params,
+    runtime_parameters=args.runtime_parameters,
+    output_file_directory=args.output_dir
+)
