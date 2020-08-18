@@ -102,17 +102,18 @@ class ApiInstance:
         return JSONResponse({"status": "Ready", "ready": True}, 200)
 
     def stop(self):
-        if not self.__is_loading:
+        if not self.__is_loading and hasattr(self.__service, 'dispose'):
             self.__service.dispose()
         
     async def __do_load(self):
         print("load")
         service, config_parameters = mlservicewrapper.server.get_service_instance()
 
-        context = mlservicewrapper.contexts.EnvironmentVariableServiceContext("SERVICE_", config_parameters)
+        if hasattr(service, 'load'):
+            context = mlservicewrapper.contexts.EnvironmentVariableServiceContext("SERVICE_", config_parameters)
 
-        print("service.load")
-        await service.load(context)
+            print("service.load")
+            await service.load(context)
 
         self.__service = service
 

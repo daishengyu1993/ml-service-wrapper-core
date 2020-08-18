@@ -21,8 +21,3 @@ class Service:
 
         pass
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, ctx_type, ctx_value, ctx_traceback):
-        self.dispose()

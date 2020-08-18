@@ -40,7 +40,7 @@ def _print_ascii_histogram(seq: typing.List[float]) -> None:
         if ct > 0:
             w = max(w, 1)
 
-        print('{0:5f} {1}'.format(e, '+' * w))
+        print('{0:5f}s {1}'.format(e, '+' * w))
 
 class _LocalLoadContext(contexts.ServiceContext):
     def __init__(self, parameters: dict = None):
@@ -151,17 +151,26 @@ class _LocalDataFrameRunContext(contexts.ProcessContext):
 
     
 
-def run(service: services.Service, input_file_directory: str, output_file_directory: str = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None):
+def run(service: typing.Union[services.Service, typing.Callable], input_file_directory: str, output_file_directory: str = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None):
+    if callable(service):
+        service = service()
+        initialized_service = True
+    else:
+        initialized_service = False
+    
     load_context = _LocalLoadContext(load_parameters)
 
     loop = asyncio.get_event_loop()
 
-    print("Loading...")
-    s = time.perf_counter()
-    loop.run_until_complete(service.load(load_context))
-    e = time.perf_counter()
+    if hasattr(service, 'load'):
+        print("Loading...")
+        s = time.perf_counter()
+        loop.run_until_complete(service.load(load_context))
+        e = time.perf_counter()
 
-    load_time = e - s
+        load_time = e - s
+    else:
+        load_time = 0
     
     print("Running...")
 
@@ -204,5 +213,8 @@ def run(service: services.Service, input_file_directory: str, output_file_direct
         print("Max process time: {}s".format(max(times)))
 
         _print_ascii_histogram(times)
+
+    if initialized_service and hasattr(service, 'dispose'):
+        service.dispose()
     
     return dict(run_context.output_dataframes())
