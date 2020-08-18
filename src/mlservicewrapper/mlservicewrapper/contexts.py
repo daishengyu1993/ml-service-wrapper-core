@@ -14,7 +14,7 @@ class NameValidator:
     @classmethod
     def raise_if_invalid(cls, name: str):
         if not cls.__valid_name_regex.match(name):
-            raise "Name is not valid: '{}'!".format(name)
+            raise ValueError("Name is not valid: '{}'!".format(name))
 
         pass
     

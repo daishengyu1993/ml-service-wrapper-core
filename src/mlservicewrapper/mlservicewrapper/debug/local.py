@@ -41,7 +41,7 @@ def get_input_path(dir_path: str, name: str):
             continue
 
         if file_path:
-            raise "Multiple files matched input dataset {}".format(name)
+            raise ValueError("Multiple files matched input dataset {}".format(name))
 
         file_path = f.path
 

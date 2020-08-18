@@ -18,7 +18,7 @@ def get_service_instance(config_path: str = None) -> (Service, dict):
     service_script_path = config["modulePath"]
 
     if service_script_path is None:
-        raise "The modulePath couldn't be determined!"
+        raise ValueError("The modulePath couldn't be determined!")
 
     config_directory_path = os.path.dirname(config_path)
 
