@@ -6,7 +6,7 @@
 Install directly from Git:
 
 ```bash
-pip install "https://github.com/MaJaHa95/ml-service-wrapper/releases/download/v0.2.10-alpha/mlservicewrapper-0.2.10a0.tar.gz"
+pip install "https://github.com/MaJaHa95/ml-service-wrapper/releases/download/v0.2.11-alpha/mlservicewrapper-0.2.11a0.tar.gz"
 ```
 
 # Implementing an ML service
