@@ -1,3 +1,4 @@
+import math
 import statistics
 import asyncio
 import json
@@ -10,6 +11,36 @@ import pandas as pd
 
 from .. import contexts, errors, services
 
+def _print_ascii_histogram(seq: typing.List[float]) -> None:
+    """A horizontal frequency-table/histogram plot."""
+
+    hist = {}
+
+    _min = min(seq)
+    _max = max(seq)
+    _len = len(seq)
+
+    buckets = 10
+    step = (_max - _min) / (buckets - 1)
+
+    for i in seq:
+        e = _min + (math.floor((i - _min) / step) * step)
+
+        hist[e] = hist.get(e, 0) + 1
+
+    for i in range(buckets):
+        e = _min + (i * step)
+
+        ct = hist.get(e, 0)
+
+        pct = ct / _len
+
+        w = math.floor(40 * pct)
+
+        if ct > 0:
+            w = max(w, 1)
+
+        print('{0:5f} {1}'.format(e, '+' * w))
 
 class _LocalLoadContext(contexts.ServiceContext):
     def __init__(self, parameters: dict = None):
@@ -86,9 +117,9 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         
         await super().set_output_dataframe(name, df)
         
-        print("Got results for {}".format(name))
-        print(df)
-        print()
+        # print("Got results for {}".format(name))
+        # print(df)
+        # print()
 
         if self.__output_files_dir:
             os.makedirs(self.__output_files_dir, exist_ok=True)
@@ -162,10 +193,16 @@ def run(service: services.Service, input_file_directory: str, output_file_direct
         times.append(e - s)
 
     print("Load time: {}s".format(load_time))
-    print()
-    print("Min process time: {}s".format(min(times)))
-    print("Mean process time: {}s".format(statistics.mean(times)))
-    print("Median process time: {}s".format(statistics.median(times)))
-    print("Max process time: {}s".format(max(times)))
+    if len(times) == 1:
+        print("Process time: {}s".format(times[0]))
+    else:
+        print()
+        print("Count: {}".format(len(times)))
+        print("Min process time: {}s".format(min(times)))
+        print("Mean process time: {}s".format(statistics.mean(times)))
+        print("Median process time: {}s".format(statistics.median(times)))
+        print("Max process time: {}s".format(max(times)))
+
+        _print_ascii_histogram(times)
     
     return dict(run_context.output_dataframes())
