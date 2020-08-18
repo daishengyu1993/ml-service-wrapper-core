@@ -86,10 +86,12 @@ def run(service: services.Service, input_file_directory: str, load_parameters: d
 
     run_context = _LocalRunContext(input_file_directory, output_file_directory, runtime_parameters)
 
+    loop = asyncio.get_event_loop()
+
     print("Loading...")
-    asyncio.run(service.load(load_context))
+    loop.run_until_complete(service.load(load_context))
 
     print("Running...")
-    asyncio.run(service.process(run_context))
+    loop.run_until_complete(service.process(run_context))
 
     return dict(run_context.output_dataframes())
