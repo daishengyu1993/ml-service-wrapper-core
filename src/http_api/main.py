@@ -165,7 +165,7 @@ class ApiInstance:
 api = ApiInstance()
 
 routes = [
-    Route("/api/process", endpoint=api.process, methods=["POST"]),
+    Route("/api/process/batch", endpoint=api.process, methods=["POST"]),
     Route("/api/status", endpoint=api.get_status, methods=["GET"])
 ]
 
