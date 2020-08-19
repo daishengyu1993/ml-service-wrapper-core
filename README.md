@@ -15,13 +15,13 @@ Write a class that matches the interface defined by `Service`:
 
 ```python
 import mlservicewrapper
-import mlservicewrapper.services
+import mlservicewrapper.core.services
 
-class SampleService(mlservicewrapper.services.Service):
-    async def load(self, ctx: mlservicewrapper.contexts.ServiceContext):
+class SampleService(mlservicewrapper.core.services.Service):
+    async def load(self, ctx: mlservicewrapper.core.contexts.ServiceContext):
         pass
 
-    async def process(self, ctx: mlservicewrapper.contexts.ProcessContext):
+    async def process(self, ctx: mlservicewrapper.core.contexts.ProcessContext):
         pass
 
     def dispose(self):
@@ -133,7 +133,7 @@ See `./sample/1_simple/src/debug.py` for an example.
 Call the debug module directly:
 
 ```bash
-python -m mlservicewrapper.debug \
+python -m mlservicewrapper.core.debug \
     --config "./sample/1_simple/src/config.json" \
     --input-dir "./sample/1_simple/data/input" \
     --load-params ModBy=3
@@ -146,7 +146,7 @@ Call the debug module with `--split-dataset-for-perf <dataset name>` to perform 
 This is meant to simulate a non-batching HTTP client.
 
 ```bash
-python -m mlservicewrapper.debug \
+python -m mlservicewrapper.core.debug \
     --config "./sample/1_simple/src/config.json" \
     --input-dir "./sample/1_simple/data/input" \
     --load-params ModBy=3

@@ -14,7 +14,7 @@ class _StoreDictKeyPair(argparse.Action):
             my_dict[k] = v
         setattr(namespace, self.dest, my_dict)
 
-parser = argparse.ArgumentParser(description='Locally debug.', prog = "mlservicewrapper.debug")
+parser = argparse.ArgumentParser(description='Locally debug.', prog = "mlservicewrapper.core.debug")
 parser.add_argument(
     '--config', help='Path to service configuration file', required=True)
 parser.add_argument('--input-dir', dest='input_dir',

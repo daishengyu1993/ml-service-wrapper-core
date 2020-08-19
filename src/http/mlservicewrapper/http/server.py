@@ -14,11 +14,11 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 from starlette.routing import Route
 
-import mlservicewrapper
-import mlservicewrapper.contexts
-import mlservicewrapper.errors
-import mlservicewrapper.services
-import mlservicewrapper.server
+import mlservicewrapper.core
+import mlservicewrapper.core.contexts
+import mlservicewrapper.core.errors
+import mlservicewrapper.core.services
+import mlservicewrapper.core.server
 
 def error_response(status_code: int, message: str):
     return JSONResponse({"error": message}, status_code)
@@ -32,20 +32,20 @@ def bad_request_response(message: str, input_type: str = None, name: str = None,
         "additionalInformation": additional_details
     }, 400)
 
-class HttpJsonRunContext(mlservicewrapper.contexts.CollectingProcessContext):
+class HttpJsonRunContext(mlservicewrapper.core.contexts.CollectingProcessContext):
     def __init__(self, parameters: dict, inputs: dict):
         super().__init__()
         self.__parameters = parameters or dict()
         self.__inputs = inputs or dict()
 
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
-        mlservicewrapper.contexts.NameValidator.raise_if_invalid(name)
+        mlservicewrapper.core.contexts.NameValidator.raise_if_invalid(name)
 
         if name in self.__parameters:
             return self.__parameters[name]
 
         if required and default is None:
-            raise mlservicewrapper.errors.MissingParameterError(name)
+            raise mlservicewrapper.core.errors.MissingParameterError(name)
 
         return default
     
@@ -55,7 +55,7 @@ class HttpJsonRunContext(mlservicewrapper.contexts.CollectingProcessContext):
             return pd.DataFrame.from_records(self.__inputs[name])
 
         if required:
-            raise mlservicewrapper.errors.MissingDatasetError(name)
+            raise mlservicewrapper.core.errors.MissingDatasetError(name)
 
         return None
 
@@ -80,13 +80,13 @@ class ApiInstance:
 
         try:
             await self.__service.process(req_ctx)
-        except mlservicewrapper.errors.BadParameterError as err:
+        except mlservicewrapper.core.errors.BadParameterError as err:
             return bad_request_response(err.message, "parameter", err.name)
-        except mlservicewrapper.errors.DatasetFieldError as err:
+        except mlservicewrapper.core.errors.DatasetFieldError as err:
             return bad_request_response(err.message, "dataset", err.name, { "field": err.field_name })
-        except mlservicewrapper.errors.BadDatasetError as err:
+        except mlservicewrapper.core.errors.BadDatasetError as err:
             return bad_request_response(err.message, "dataset", err.name)
-        except mlservicewrapper.errors.BadRequestError as err:
+        except mlservicewrapper.core.errors.BadRequestError as err:
             return bad_request_response(err.message)
 
         outputs_dict = dict(((k, v.to_dict("records")) for k, v in req_ctx.output_dataframes()))
@@ -107,10 +107,10 @@ class ApiInstance:
         
     async def __do_load(self):
         print("load")
-        service, config_parameters = mlservicewrapper.server.get_service_instance()
+        service, config_parameters = mlservicewrapper.core.server.get_service_instance()
 
         if hasattr(service, 'load'):
-            context = mlservicewrapper.contexts.EnvironmentVariableServiceContext("SERVICE_", config_parameters)
+            context = mlservicewrapper.core.contexts.EnvironmentVariableServiceContext("SERVICE_", config_parameters)
 
             print("service.load")
             await service.load(context)
@@ -134,7 +134,7 @@ class ApiInstance:
         #asyncio.to_thread()
 
     # async def __load(self):
-    #     context = mlservicewrapper.contexts.EnvironmentVariableServiceContext("SERVICE_", self.__config_parameters)
+    #     context = mlservicewrapper.core.contexts.EnvironmentVariableServiceContext("SERVICE_", self.__config_parameters)
 
     #     await self.__service.load(context)
 
@@ -159,7 +159,7 @@ class ApiInstance:
         # load_run = Thread(target=run, args=())
         # load_run.start()
 
-# def add_routes(routes: list, service: mlservicewrapper.services.Service, route_name: str = None):
+# def add_routes(routes: list, service: mlservicewrapper.core.services.Service, route_name: str = None):
 #     route_prefix = "/api"
 
 api = ApiInstance()
