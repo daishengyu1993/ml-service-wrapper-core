@@ -3,11 +3,17 @@
 
 # Installing
 
-Install directly from Git:
-
-```bash
-pip install "https://github.com/MaJaHa95/ml-service-wrapper/releases/download/v0.3.0-alpha/mlservicewrapper-0.3.0a0.tar.gz"
-```
+* Install using pip
+    ```
+    pip install mlservicewrapper-core
+    ```
+* Install directly from [the latest GitHub Release](https://github.com/MaJaHa95/ml-service-wrapper/releases/latest).
+* Install from this repo
+    ```
+    git clone https://github.com/MaJaHa95/ml-service-wrapper.git
+    cd ml-service-wrapper
+    pip install ./src
+    ```
 
 # Implementing an ML service
 
