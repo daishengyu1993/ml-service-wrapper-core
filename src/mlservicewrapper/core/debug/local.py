@@ -256,4 +256,4 @@ def run(service: typing.Union[services.Service, typing.Callable], input_file_dir
 
     loop = asyncio.get_event_loop()
 
-    loop.run_until_complete(run_async(service, input_file_directory, output_file_directory, split_dataset_name, load_parameters, runtime_parameters, assess_accuracy))
+    return loop.run_until_complete(run_async(service, input_file_directory, output_file_directory, split_dataset_name, load_parameters, runtime_parameters, assess_accuracy))

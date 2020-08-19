@@ -42,7 +42,7 @@ if config_params:
 if args.load_params:
     load_params.update(args.load_params)
     
-result = local.run(
+local.run(
     service,
     args.input_dir,
     split_dataset_name=args.split_dataset_name,

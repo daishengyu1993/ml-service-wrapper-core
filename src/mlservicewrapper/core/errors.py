@@ -16,7 +16,7 @@ class DatasetFieldError(BadDatasetError):
 
 class MissingDatasetFieldError(DatasetFieldError):
     def __init__(self, dataset_name: str, field_name: str, message: str = None):
-        super().__init__(dataset_name, field_name, message or "The field '{}' on input dataset'{}' is required but could not be found!".format(field_name, dataset_name))
+        super().__init__(dataset_name, field_name, message or "The field '{}' on input dataset '{}' is required but could not be found!".format(field_name, dataset_name))
 
 class MissingDatasetError(BadDatasetError):
     def __init__(self, dataset_name: str, message: str = None):
