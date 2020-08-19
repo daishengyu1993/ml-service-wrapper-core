@@ -1,5 +1,6 @@
 
-![Release](https://github.com/MaJaHa95/ml-service-wrapper/workflows/Create%20Release/badge.svg)
+[![Release](https://github.com/MaJaHa95/ml-service-wrapper/workflows/Create%20Release/badge.svg)](https://github.com/MaJaHa95/ml-service-wrapper/releases/latest)
+[![PyPI Latest Release](https://img.shields.io/pypi/v/mlservicewrapper-core.svg)](https://pypi.org/project/mlservicewrapper-core/)
 
 # Installing
 
