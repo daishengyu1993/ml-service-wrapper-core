@@ -28,8 +28,12 @@ jobs:
       name: Build
       env:
         USE_SCM_VERSION: true
+        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
       run: |
         python ./src/setup.py sdist bdist_wheel
+        
+        twine upload --repository testpypi ./dist/*
 
         distPath=`realpath ./dist`
 
@@ -58,12 +62,3 @@ jobs:
         asset_path: ${{ steps.dist.outputs.dist_path }}/${{ steps.dist.outputs.dist_tarball_name }}
         asset_name: ${{ steps.dist.outputs.dist_tarball_name }}
         asset_content_type: application/gzip
-
-    - name: Publish to testpypi
-      working-directory: ./src/core/
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-        DIST_PATH:  ${{ steps.dist.outputs.dist_path }}
-      run: |
-        python -m twine upload --repository testpypi ${DIST_PATH}/*
