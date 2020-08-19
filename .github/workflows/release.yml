@@ -35,7 +35,7 @@ jobs:
 
         mostRecentTarball=`ls -Art "$distPath" | grep -G ".*\.tar\.gz" | tail -n 1`
         echo "::set-output name=dist_tarball_name::$mostRecentTarball"
-        echo "::set-output name=dist_path::${distPath}
+        echo "::set-output name=dist_path::${distPath}"
         
     - name: Create Release
       id: create_release
