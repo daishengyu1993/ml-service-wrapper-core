@@ -124,6 +124,8 @@ Follow simple rules when naming parameters and datasets:
 
 Examples below use the sample service, and consequently require cloning of this repository to run.
 
+Note that for all debug executions, datasets are discovered in the input directory based on name without extension. For example, `await ctx.get_input_dataframe("Input")` will match `$input_dir/Input.csv`. Name collisions (i.e. when two file names match the desired dataset but they have different extensions) will result in an error.
+
 ## Write your own debug script
 
 See `./sample/1_simple/src/debug.py` for an example.
@@ -152,3 +154,11 @@ python -m mlservicewrapper.core.debug \
     --load-params ModBy=3
     --split-dataset-for-perf Data
 ```
+
+# Accuracy Evaluation
+
+Any form of model evaluation is welcome, but a helper is exposed for assessing accuracy for labeling tasks.
+
+Call the debug module with `--assess-accuracy <input dataset name>.<input dataset field>=<output dataset name>.<output dataset field>` to calculate the percentage of time the output dataset field matches the input dataset.
+
+This only works, of course, when the input dataset contains a truth label field.
