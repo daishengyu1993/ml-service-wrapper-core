@@ -8,11 +8,11 @@
     pip install mlservicewrapper-core
     ```
 * Install directly from [the latest GitHub Release](https://github.com/MaJaHa95/ml-service-wrapper/releases/latest).
-* Install from this repo
+* Install from source
     ```
     git clone https://github.com/MaJaHa95/ml-service-wrapper.git
     cd ml-service-wrapper
-    pip install ./src
+    pip install .
     ```
 
 # Implementing an ML service
