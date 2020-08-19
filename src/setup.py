@@ -3,7 +3,7 @@ from setuptools import find_namespace_packages, setup, find_packages
 
 if os.environ.get("USE_SCM_VERSION"):
    use_scm_version = {
-      "root": "../..",
+      "root": "..",
       "relative_to": __file__
    }
    version = None
