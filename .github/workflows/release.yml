@@ -57,8 +57,7 @@ jobs:
         asset_name: ${{ steps.dist.outputs.dist_tarball_name }}
         asset_content_type: application/gzip
 
-    - id: dist
-      name: Publish to testpypi
+    - name: Publish to testpypi
       working-directory: ./src/core/
       env:
         TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
