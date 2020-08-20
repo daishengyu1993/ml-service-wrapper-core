@@ -5,6 +5,7 @@ from pandas import DataFrame
 
 from .contexts import ProcessContext, ServiceContext
 
+__all__ = ["Service"]
 
 class Service:
     async def load(self, ctx: ServiceContext):

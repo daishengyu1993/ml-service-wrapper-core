@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from .contexts import EnvironmentVariableServiceContext
 from .services import Service
 
+__all__ = ["get_service_instance"]
 
 def get_service_instance(config_path: str = None) -> (Service, dict):
     if not config_path:
@@ -54,3 +55,4 @@ def get_service_instance(config_path: str = None) -> (Service, dict):
     print("Got service: {}".format(service))
 
     return (service, config.get("parameters", dict()))
+
