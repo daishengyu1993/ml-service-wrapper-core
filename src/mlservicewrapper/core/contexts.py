@@ -28,10 +28,10 @@ class ProcessContext:
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         raise NotImplementedError()
     
-    def get_input_dataframe(self, name: str, required: bool = True) -> types.CoroutineType:
+    async def get_input_dataframe(self, name: str, required: bool = True) -> types.CoroutineType:
         raise NotImplementedError()
 
-    def set_output_dataframe(self, name: str, df: pd.DataFrame) -> types.CoroutineType:
+    async def set_output_dataframe(self, name: str, df: pd.DataFrame) -> types.CoroutineType:
         raise NotImplementedError()
         
 class CollectingProcessContext(ProcessContext):
