@@ -1,20 +1,12 @@
 import os
 from setuptools import find_namespace_packages, setup, find_packages
 
-if os.environ.get("USE_SCM_VERSION"):
-   use_scm_version = True
-   version = None
-else:
-   use_scm_version = False
-   version = "0.0.0"
-
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setup(
    name='mlservicewrapper-core',
-   version = version,
-   use_scm_version = use_scm_version,
+   use_scm_version = True,
    description='Configure a Python service for repeated execution',
    author='Matthew Haugen',
    author_email='mhaugen@haugenapplications.com',
