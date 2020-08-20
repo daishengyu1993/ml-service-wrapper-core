@@ -1,5 +1,5 @@
 
-[![Release](https://github.com/MaJaHa95/ml-service-wrapper/workflows/Create%20Release/badge.svg)](https://github.com/MaJaHa95/ml-service-wrapper/releases/latest)
+[![Release](https://github.com/ml-service-wrapper/ml-service-wrapper-core/workflows/Create%20Release/badge.svg)](https://github.com/ml-service-wrapper/ml-service-wrapper-core/releases/latest)
 [![PyPI Latest Release](https://img.shields.io/pypi/v/mlservicewrapper-core.svg)](https://pypi.org/project/mlservicewrapper-core/)
 
 # Installing
@@ -8,10 +8,10 @@
     ```
     pip install mlservicewrapper-core
     ```
-* Install directly from [the latest GitHub Release](https://github.com/MaJaHa95/ml-service-wrapper/releases/latest).
+* Install directly from [the latest GitHub Release](https://github.com/ml-service-wrapper/ml-service-wrapper-core/releases/latest).
 * Install from source
     ```
-    git clone https://github.com/MaJaHa95/ml-service-wrapper.git
+    git clone https://github.com/ml-service-wrapper/ml-service-wrapper-core.git
     cd ml-service-wrapper
     pip install .
     ```
