@@ -131,15 +131,13 @@ Follow simple rules when naming parameters and datasets:
 
 Examples below use the sample service, and consequently require cloning of this repository to run.
 
-Note that for all debug executions, datasets are discovered in the input directory based on name without extension. For example, `await ctx.get_input_dataframe("Input")` will match `$input_dir/Input.csv`. Name collisions (i.e. when two file names match the desired dataset but they have different extensions) will result in an error.
-
 ## Write your own debug script
 
 See `./sample/1_simple/src/debug.py` for an example.
 
-## Test end-to-end using configuration file
+## Test end-to-end using a configuration file
 
-Call the debug module directly:
+Call the debug module directly. The provided configuration file is parsed, just like it would be in a production environment.
 
 ```bash
 python -m mlservicewrapper.core.debug \
@@ -148,24 +146,23 @@ python -m mlservicewrapper.core.debug \
     --load-params ModBy=3
 ```
 
-# Performance evaluation
+| Parameter | Required? | Description | Example |
+| --------------- | --------------- | --------------- | --------------- |
+| --config | **Yes** | Path to service configuration file | `--config "./sample/1_simple/src/config.json"` |
+| --input-dir | No | Path to input directory. Input datasets will be looked up within the directory. | `--input-dir "./sample/1_simple/data/input"` |
+| --input-paths | No | Path mapping for input datasets. Multiple values can be comma-delimited, and each value takes the form of `<dataset name>=<path>`. Explicitly-pathed datasets will override any files from `--input-dir`, if both are provided. | `--input-paths Data=./sample/1_simple/data/input/Data.csv` |
+| --output-dir | No | Path to output directory. Output datasets will be looked up within the directory. | `--output-dir "./sample/1_simple/data/output"` |
+| --output-paths | No | Path mapping for output datasets. Multiple values can be comma-delimited, and each value takes the form of `<dataset name>=<path>`. Explicitly-pathed datasets will override any files from `--output-dir`, if both are provided. | `--output-paths Data=./sample/1_simple/data/output/Data.csv` |
+| --load-params | No | Values for `ServiceContext` parameters. Multiple values can be comma-delimited, and each value takes the form of `<key>=<value>` | `--load-params ModBy=3` |
+| --run-params | No | Values for `ProcessContext` parameters. Multiple values can be comma-delimited, and each value takes the form of `<key>=<value>` | `--run-params RuntimeOption=OptionValue` |
+| --split-dataset-for-perf | No | Runs performance analysis against the named dataset. This involves splitting the dataset into one-row chunks and calling `process` against each row independently, timing each execution, and reporting statistics. This is meant to help simulate a runtime environment where only one row is received at a time (e.g. for HTTP clients that don't use batching.) | `--split-dataset-for-perf Data` |
+| --assess-accuracy | No | Calculates classification accuracy for the named input and output fields. This is useful when testing on a pre-labeled data file that contains truth labels which are ignored by the `process` call itself, for example a file used for training. Accuracy is calculated as the percentage of time the value in the input dataset field is exactly equal to that in the output dataset, meaning formatting (including case and whitespace) must be taken into consideration. | `--assess-accuracy InputData.ActualLabel=OutputData.PredictedLabel` |
 
-Call the debug module with `--split-dataset-for-perf <dataset name>` to perform timing. The named dataset, sourced from the input directory, will be split into individual rows, and passed independently to the process context. Timing information will be printed after execution completes.
 
-This is meant to simulate a non-batching HTTP client.
+# Host and Deploy
 
-```bash
-python -m mlservicewrapper.core.debug \
-    --config "./sample/1_simple/src/config.json" \
-    --input-dir "./sample/1_simple/data/input" \
-    --load-params ModBy=3
-    --split-dataset-for-perf Data
-```
+Use a host to run the service in production. A host will use its own implementation for contexts, which could pull input datasets from unexpected locations.
 
-# Accuracy Evaluation
+At present, there is only one host natively supported:
 
-Any form of model evaluation is welcome, but a helper is exposed for assessing accuracy for labeling tasks.
-
-Call the debug module with `--assess-accuracy <input dataset name>.<input dataset field>=<output dataset name>.<output dataset field>` to calculate the percentage of time the output dataset field matches the input dataset.
-
-This only works, of course, when the input dataset contains a truth label field.
+* [ml-service-wrapper-host-http](https://github.com/ml-service-wrapper/ml-service-wrapper-host-http), which wraps the ML service as an HTTP endpoint, exposing it with JSON endpoints.
