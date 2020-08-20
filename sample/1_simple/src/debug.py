@@ -2,7 +2,7 @@ import os
 
 import mlservicewrapper
 import mlservicewrapper.core.debug
-from service import SampleService, AutoDisposeService
+from service import SampleService
 
 root_dir = os.path.join(os.path.dirname(__file__), '..')
 

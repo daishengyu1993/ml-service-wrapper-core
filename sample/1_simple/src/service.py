@@ -1,15 +1,11 @@
 import asyncio
-import os
-import time
 
-from pandas import DataFrame
+import pandas as pd
 
-import dal
 import mlservicewrapper
 import mlservicewrapper.core.contexts
 import mlservicewrapper.core.services
 import mlservicewrapper.core.errors
-
 
 class SampleService(mlservicewrapper.core.services.Service):
     async def load(self, ctx: mlservicewrapper.core.contexts.ServiceContext):
@@ -21,6 +17,9 @@ class SampleService(mlservicewrapper.core.services.Service):
         if "TextField" not in input_data.columns:
             raise mlservicewrapper.core.errors.MissingDatasetFieldError("Data", "TextField")
 
-        result = dal.process(input_data, self.__mod_by)
+        result = pd.DataFrame(input_data["TextField"].str.len() % self.__mod_by)
+
+        result.columns = ["Result"]
+        result.insert(0, "Id", input_data["Id"])
 
         await ctx.set_output_dataframe("Results", result)

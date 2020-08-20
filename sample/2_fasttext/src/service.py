@@ -15,21 +15,26 @@ import shutil
 import json
 
 class FastTextServiceBase(mlservicewrapper.core.services.Service):
+
     async def load(self, ctx: mlservicewrapper.core.contexts.ServiceContext):
         model_path = self.get_model_path(ctx)
         
         if not os.path.exists(model_path):
             url = self.get_model_url(ctx)
 
-            http = urllib3.PoolManager()
-            r = http.request('GET', url, preload_content=False)
-
-            with open(model_path, 'wb') as out:
-                shutil.copyfileobj(r, out)
-
-            r.release_conn()
+            self.download_model(url, model_path)
 
         self.model = fasttext.load_model(model_path)
+
+    @staticmethod
+    def download_model(model_url: str, model_path: str):
+        http = urllib3.PoolManager()
+        r = http.request('GET', model_url, preload_content=False)
+
+        with open(model_path, 'wb') as out:
+            shutil.copyfileobj(r, out)
+
+        r.release_conn()
 
     def get_model_path(self, ctx: mlservicewrapper.core.contexts.ServiceContext):
         return ctx.get_parameter_value("ModelPath", required=True)
