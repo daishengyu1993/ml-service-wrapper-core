@@ -17,10 +17,13 @@ class _StoreDictKeyPair(argparse.Action):
 parser = argparse.ArgumentParser(description='Locally debug.', prog = "mlservicewrapper.core.debug")
 parser.add_argument(
     '--config', help='Path to service configuration file', required=True)
-parser.add_argument('--input-dir', dest='input_dir',
-                    help='Path to input directory', required=True)
-parser.add_argument('--output-dir', dest='output_dir',
-                    help='Path to input directory')
+
+parser.add_argument('--input-dir', dest='input_dir', help='Path to input directory')
+parser.add_argument('--input-paths', dest='input_paths', help='Map input datasets to paths', action=_StoreDictKeyPair, metavar="<dataset name 1>=<path>,<dataset name 2>=<path>...")
+
+parser.add_argument('--output-dir', dest='output_dir', help='Path to input directory')
+parser.add_argument('--output-paths', dest='output_paths', help='Map output datasets to paths', action=_StoreDictKeyPair, metavar="<dataset name 1>=<path>,<dataset name 2>=<path>...")
+
 parser.add_argument("--load-params", dest="load_params", action=_StoreDictKeyPair, metavar="KEY1=VAL1,KEY2=VAL2...")
 parser.add_argument("--run-params", dest="runtime_parameters", action=_StoreDictKeyPair, metavar="KEY1=VAL1,KEY2=VAL2...")
 
@@ -44,10 +47,17 @@ if args.load_params:
     
 local.run(
     service,
-    args.input_dir,
-    split_dataset_name=args.split_dataset_name,
+
     load_parameters=args.load_params,
     runtime_parameters=args.runtime_parameters,
-    output_file_directory=args.output_dir,
+
+    input_dataset_paths=args.input_paths,
+    input_dataset_directory=args.input_dir,
+
+    split_dataset_name=args.split_dataset_name,
+    
+    output_dataset_directory=args.output_dir,
+    output_dataset_paths=args.output_paths,
+    
     assess_accuracy=args.assess_accuracy
 )

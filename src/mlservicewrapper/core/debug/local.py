@@ -9,6 +9,8 @@ import time
 
 import pandas as pd
 
+import logging
+
 from .. import contexts, errors, services
 
 def _print_ascii_histogram(seq: typing.List[float]) -> None:
@@ -42,6 +44,30 @@ def _print_ascii_histogram(seq: typing.List[float]) -> None:
 
         print('{0:5f}s {1}'.format(e, '+' * w))
 
+class _FileDatasetLookup:
+    def __init__(self, directory: str, path_map: typing.Dict[str, str]):
+        self.__directory = directory
+        self.__map = path_map
+
+    def get_path(self, name: str, extension: str):
+        if self.__map is not None and name in self.__map:
+            return self.__map[name]
+
+        if self.__directory is not None:
+            return os.path.join(self.__directory, name + "." + extension)
+
+        return None
+
+def get_input_dataframe(name: str, file_lookup: _FileDatasetLookup) -> pd.DataFrame:
+    contexts.NameValidator.raise_if_invalid(name)
+
+    file_path = file_lookup.get_path(name, "csv")
+
+    if file_path:
+        return pd.read_csv(file_path)
+
+    return None
+
 class _LocalLoadContext(contexts.ServiceContext):
     def __init__(self, parameters: dict = None):
         self.__parameters = parameters or dict()
@@ -63,38 +89,13 @@ class _LocalLoadContext(contexts.ServiceContext):
 
         return default
 
-def get_input_path(dir_path: str, name: str):
-    name_regex = re.escape(name) + r"\.\w+"
-    
-    file_path: str = None
-    for f in os.scandir(dir_path):
-        if not re.match(name_regex, f.name):
-            continue
-
-        if file_path:
-            raise ValueError("Multiple files matched input dataset {}".format(name))
-
-        file_path = f.path
-
-    return file_path
-
-def get_input_dataframe(dir_path: str, name: str):
-    contexts.NameValidator.raise_if_invalid(name)
-    
-    file_path = get_input_path(dir_path, name)
-
-    if file_path:
-        return pd.read_csv(file_path)
-
-    return None
-
 class _LocalRunContext(contexts.CollectingProcessContext):
-    def __init__(self, input_files_dir: str, output_files_dir: str = None, parameters: dict = None):
+    def __init__(self, input_datasets: _FileDatasetLookup, output_datasets: _FileDatasetLookup = None, parameters: dict = None):
         super().__init__()
         self.__parameters = parameters or dict()
 
-        self.__input_files_dir = input_files_dir
-        self.__output_files_dir = output_files_dir
+        self.__input_datasets = input_datasets
+        self.__output_datasets = output_datasets
 
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         contexts.NameValidator.raise_if_invalid(name)
@@ -110,7 +111,7 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         return default
 
     async def get_input_dataframe(self, name: str, required: bool = True):
-        df = get_input_dataframe(self.__input_files_dir, name)
+        df = get_input_dataframe(name, self.__input_datasets)
         
         if required and df is None:
             raise errors.MissingDatasetError(name)
@@ -126,10 +127,13 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         # print(df)
         # print()
 
-        if self.__output_files_dir:
-            os.makedirs(self.__output_files_dir, exist_ok=True)
+        path = self.__output_datasets.get_path(name, "csv")
+        
+        if path:
+            dir = os.path.dirname(path)
+            os.makedirs(dir, exist_ok=True)
 
-            df.to_csv(os.path.join(self.__output_files_dir, name + ".csv"), index=False)
+            df.to_csv(path, index=False)
 
 class _LocalDataFrameRunContext(contexts.ProcessContext):
     def __init__(self, df: pd.DataFrame, name: str, base_ctx: contexts.ProcessContext):
@@ -179,7 +183,10 @@ async def _perform_accuracy_assessment(ctx: contexts.CollectingProcessContext, s
         print("Accuracy ({} to {}): {} of {} ({})".format(k, v, count_correct, count_total, count_correct / count_total))
 
 
-async def run_async(service: typing.Union[services.Service, typing.Callable], input_file_directory: str, output_file_directory: str = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None):
+async def run_async(service: typing.Union[services.Service, typing.Callable], input_dataset_paths: typing.Dict[str, str] = None, input_dataset_directory: str = None, output_dataset_directory: str = None, output_dataset_paths: typing.Dict[str, str] = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None):
+    if input_dataset_paths is None and input_dataset_directory is None:
+        logging.warn("Neither input_dataset_paths nor input_dataset_directory was specified, meaning input datasets will not be available!")
+    
     if callable(service):
         service = service()
         initialized_service = True
@@ -200,15 +207,16 @@ async def run_async(service: typing.Union[services.Service, typing.Callable], in
     
     print("Running...")
 
-    run_context = _LocalRunContext(input_file_directory, output_file_directory, runtime_parameters)
+    input_datasets = _FileDatasetLookup(input_dataset_directory, input_dataset_paths)
+    output_datasets = _FileDatasetLookup(output_dataset_directory, output_dataset_paths)
+
+    run_context = _LocalRunContext(input_datasets, output_datasets, runtime_parameters)
 
     times = list()
 
     if split_dataset_name:
-        split_dataset_path = get_input_path(input_file_directory, split_dataset_name)
+        df = get_input_dataframe(split_dataset_name, input_datasets)
         
-        df = pd.read_csv(split_dataset_path)
-
         for r in df.itertuples(index=False):
             rdf = pd.DataFrame([r])
         
@@ -250,8 +258,8 @@ async def run_async(service: typing.Union[services.Service, typing.Callable], in
 
     return result
 
-def run(service: typing.Union[services.Service, typing.Callable], input_file_directory: str, output_file_directory: str = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None):
+def run(service: typing.Union[services.Service, typing.Callable], input_dataset_paths: typing.Dict[str, str] = None, input_dataset_directory: str = None, output_dataset_directory: str = None, output_dataset_paths: typing.Dict[str, str] = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None):
 
     loop = asyncio.get_event_loop()
 
-    return loop.run_until_complete(run_async(service, input_file_directory, output_file_directory, split_dataset_name, load_parameters, runtime_parameters, assess_accuracy))
+    return loop.run_until_complete(run_async(service, input_dataset_paths, input_dataset_directory, output_dataset_directory, output_dataset_paths, split_dataset_name, load_parameters, runtime_parameters, assess_accuracy))
