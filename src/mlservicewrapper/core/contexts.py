@@ -13,10 +13,12 @@ class NameValidator:
 
     @classmethod
     def raise_if_invalid(cls, name: str):
-        if not cls.__valid_name_regex.match(name):
+        if not cls.is_valid(name):
             raise ValueError("Name is not valid: '{}'!".format(name))
-
-        pass
+    
+    @classmethod
+    def is_valid(cls, name: str):
+        return cls.__valid_name_regex.match(name) is not None
     
 __all__ = ["NameValidator", "ServiceContext", "ProcessContext", "CollectingProcessContext", "EnvironmentVariableServiceContext"]
 
@@ -28,10 +30,10 @@ class ProcessContext:
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         raise NotImplementedError()
     
-    async def get_input_dataframe(self, name: str, required: bool = True) -> types.CoroutineType:
+    async def get_input_dataframe(self, name: str, required: bool = True, skip_name_validation = False):
         raise NotImplementedError()
 
-    async def set_output_dataframe(self, name: str, df: pd.DataFrame) -> types.CoroutineType:
+    async def set_output_dataframe(self, name: str, df: pd.DataFrame, skip_name_validation = False):
         raise NotImplementedError()
         
 class CollectingProcessContext(ProcessContext):
@@ -39,13 +41,15 @@ class CollectingProcessContext(ProcessContext):
         super()
         self.__output_dataframes = dict()
 
-    async def set_output_dataframe(self, name: str, df: pd.DataFrame):
-        NameValidator.raise_if_invalid(name)
+    async def set_output_dataframe(self, name: str, df: pd.DataFrame, skip_name_validation = False):
+        if not skip_name_validation:
+            NameValidator.raise_if_invalid(name)
 
         self.__output_dataframes[name] = df
     
-    def get_output_dataframe(self, name: str):
-        NameValidator.raise_if_invalid(name)
+    def get_output_dataframe(self, name: str, skip_name_validation = False):
+        if not skip_name_validation:
+            NameValidator.raise_if_invalid(name)
 
         return self.__output_dataframes.get(name)
 
