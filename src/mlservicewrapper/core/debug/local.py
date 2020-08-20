@@ -78,9 +78,8 @@ def get_input_path(dir_path: str, name: str):
 
     return file_path
 
-def get_input_dataframe(dir_path: str, name: str, skip_name_validation = False):
-    if not skip_name_validation:
-        contexts.NameValidator.raise_if_invalid(name)
+def get_input_dataframe(dir_path: str, name: str):
+    contexts.NameValidator.raise_if_invalid(name)
     
     file_path = get_input_path(dir_path, name)
 
@@ -110,17 +109,16 @@ class _LocalRunContext(contexts.CollectingProcessContext):
 
         return default
 
-    async def get_input_dataframe(self, name: str, required: bool = True, skip_name_validation = False):
-        df = get_input_dataframe(self.__input_files_dir, name, skip_name_validation)
+    async def get_input_dataframe(self, name: str, required: bool = True):
+        df = get_input_dataframe(self.__input_files_dir, name)
         
         if required and df is None:
             raise errors.MissingDatasetError(name)
 
         return df
 
-    async def set_output_dataframe(self, name: str, df: pd.DataFrame, skip_name_validation = False):
-        if not skip_name_validation:
-            contexts.NameValidator.raise_if_invalid(name)
+    async def set_output_dataframe(self, name: str, df: pd.DataFrame):
+        contexts.NameValidator.raise_if_invalid(name)
 
         await super().set_output_dataframe(name, df)
         
@@ -145,9 +143,8 @@ class _LocalDataFrameRunContext(contexts.ProcessContext):
     def set_output_dataframe(self, name: str, df: pd.DataFrame):
         return self.__base_ctx.set_output_dataframe(name, df)
 
-    async def get_input_dataframe(self, name: str, required: bool = True, skip_name_validation = False):
-        if not skip_name_validation:
-            contexts.NameValidator.raise_if_invalid(name)
+    async def get_input_dataframe(self, name: str, required: bool = True):
+        contexts.NameValidator.raise_if_invalid(name)
         
         if name == self.__name:
             return self.__df
@@ -163,7 +160,7 @@ async def _perform_accuracy_assessment(ctx: contexts.CollectingProcessContext, s
         i = k.split(".")
         o = v.split(".")
 
-        input_df = await ctx.get_input_dataframe(i[0], required=True, skip_name_validation=True)
+        input_df = await ctx.get_input_dataframe(i[0], required=True)
         output_df = ctx.get_output_dataframe(o[0])
 
         input_field = input_df[i[1]]

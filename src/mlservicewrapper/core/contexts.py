@@ -9,7 +9,7 @@ import pandas as pd
 from . import errors
 
 class NameValidator:
-    __valid_name_regex = re.compile(r'^[A-Z][\w\d]*$')
+    __valid_name_regex = re.compile(r'^[A-Z][a-zA-Z\d]*$')
 
     @classmethod
     def raise_if_invalid(cls, name: str):
@@ -30,10 +30,10 @@ class ProcessContext:
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         raise NotImplementedError()
     
-    async def get_input_dataframe(self, name: str, required: bool = True, skip_name_validation = False):
+    async def get_input_dataframe(self, name: str, required: bool = True):
         raise NotImplementedError()
 
-    async def set_output_dataframe(self, name: str, df: pd.DataFrame, skip_name_validation = False):
+    async def set_output_dataframe(self, name: str, df: pd.DataFrame):
         raise NotImplementedError()
         
 class CollectingProcessContext(ProcessContext):
@@ -41,15 +41,13 @@ class CollectingProcessContext(ProcessContext):
         super()
         self.__output_dataframes = dict()
 
-    async def set_output_dataframe(self, name: str, df: pd.DataFrame, skip_name_validation = False):
-        if not skip_name_validation:
-            NameValidator.raise_if_invalid(name)
+    async def set_output_dataframe(self, name: str, df: pd.DataFrame):
+        NameValidator.raise_if_invalid(name)
 
         self.__output_dataframes[name] = df
     
-    def get_output_dataframe(self, name: str, skip_name_validation = False):
-        if not skip_name_validation:
-            NameValidator.raise_if_invalid(name)
+    def get_output_dataframe(self, name: str):
+        NameValidator.raise_if_invalid(name)
 
         return self.__output_dataframes.get(name)
 
