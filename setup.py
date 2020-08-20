@@ -27,7 +27,7 @@ setup(
    packages=find_namespace_packages("src", include=['mlservicewrapper.*']),
 
    install_requires=[
-      "pandas"
+      "pandas==1.1.0"
    ],
    #namespace_packages=['mlservicewrapper.core.errors'],
    setup_requires=['setuptools_scm'],
