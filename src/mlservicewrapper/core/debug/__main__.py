@@ -33,6 +33,10 @@ parser.add_argument('--split-dataset-for-perf', dest='split_dataset_name',
 parser.add_argument('--assess-accuracy', dest='assess_accuracy', action=_StoreDictKeyPair, metavar="INPUT_DATASET_1.FIELD=OUTPUT_DATASET_1.FIELD,INPUT_DATASET_2.FIELD=OUTPUT_DATASET_2.FIELD,...",
                     help='Perform accuracy assessment against the given fields.')
 
+parser.add_argument('--profile-processing-to-file', dest='profile_processing_to_file',
+                    help='Enables profiling for the process phase, and writes results to a file which can then be read with pstats.')
+
+
 args = parser.parse_args()
 
 service, config_params = server.get_service_instance(args.config)
@@ -59,5 +63,7 @@ local.run(
     output_dataset_directory=args.output_dir,
     output_dataset_paths=args.output_paths,
     
-    assess_accuracy=args.assess_accuracy
+    assess_accuracy=args.assess_accuracy,
+
+    profile_processing_to_file=args.profile_processing_to_file
 )

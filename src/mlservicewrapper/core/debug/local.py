@@ -85,8 +85,6 @@ class _LocalLoadContext(contexts.ServiceContext):
         if required and default is None:
             raise errors.MissingParameterError(name)
 
-        print("Could not find optional parameter {}".format(name))
-
         return default
 
 class _LocalRunContext(contexts.CollectingProcessContext):
@@ -105,8 +103,6 @@ class _LocalRunContext(contexts.CollectingProcessContext):
         
         if required and default is None:
             raise errors.MissingParameterError(name)
-            
-        print("Could not find optional parameter {}".format(name))
 
         return default
 
@@ -182,8 +178,7 @@ async def _perform_accuracy_assessment(ctx: contexts.CollectingProcessContext, s
 
         print("Accuracy ({} to {}): {} of {} ({})".format(k, v, count_correct, count_total, count_correct / count_total))
 
-
-async def run_async(service: typing.Union[services.Service, typing.Callable], input_dataset_paths: typing.Dict[str, str] = None, input_dataset_directory: str = None, output_dataset_directory: str = None, output_dataset_paths: typing.Dict[str, str] = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None):
+async def run_async(service: typing.Union[services.Service, typing.Callable], input_dataset_paths: typing.Dict[str, str] = None, input_dataset_directory: str = None, output_dataset_directory: str = None, output_dataset_paths: typing.Dict[str, str] = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None, profile_processing_to_file: str = None):
     if input_dataset_paths is None and input_dataset_directory is None:
         logging.warn("Neither input_dataset_paths nor input_dataset_directory was specified, meaning input datasets will not be available!")
     
@@ -212,6 +207,17 @@ async def run_async(service: typing.Union[services.Service, typing.Callable], in
 
     run_context = _LocalRunContext(input_datasets, output_datasets, runtime_parameters)
 
+    if profile_processing_to_file is None:
+        from types import SimpleNamespace
+        
+        nop = lambda *a, **k: None
+        
+        p = SimpleNamespace(enable=nop, disable=nop, dump_stats=nop)
+    else:
+        import cProfile
+
+        p = cProfile.Profile()
+
     times = list()
 
     if split_dataset_name:
@@ -223,20 +229,30 @@ async def run_async(service: typing.Union[services.Service, typing.Callable], in
             row_run_context = _LocalDataFrameRunContext(rdf, split_dataset_name, run_context)
 
             s = time.perf_counter()
+            p.enable()
             await service.process(row_run_context)
+            p.disable()
             e = time.perf_counter()
 
             times.append(e - s)
     else:
 
         s = time.perf_counter()
+        p.enable()
         await service.process(run_context)
+        p.disable()
         e = time.perf_counter()
 
         times.append(e - s)
 
+    p.dump_stats(profile_processing_to_file)
+
+        #cProfile.runctx('_run_processing(service, times, input_datasets, run_context, split_dataset_name)', globals(), locals(), filename=profile_processing_to_file)
+
     print("Load time: {}s".format(load_time))
-    if len(times) == 1:
+    if len(times) == 0:
+        print("Count: 0")
+    elif len(times) == 1:
         print("Process time: {}s".format(times[0]))
     else:
         print()
@@ -258,8 +274,8 @@ async def run_async(service: typing.Union[services.Service, typing.Callable], in
 
     return result
 
-def run(service: typing.Union[services.Service, typing.Callable], input_dataset_paths: typing.Dict[str, str] = None, input_dataset_directory: str = None, output_dataset_directory: str = None, output_dataset_paths: typing.Dict[str, str] = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None):
+def run(service: typing.Union[services.Service, typing.Callable], input_dataset_paths: typing.Dict[str, str] = None, input_dataset_directory: str = None, output_dataset_directory: str = None, output_dataset_paths: typing.Dict[str, str] = None, split_dataset_name: str = None, load_parameters: dict = None, runtime_parameters: dict = None, assess_accuracy: dict = None, profile_processing_to_file: str = None):
 
     loop = asyncio.get_event_loop()
 
-    return loop.run_until_complete(run_async(service, input_dataset_paths, input_dataset_directory, output_dataset_directory, output_dataset_paths, split_dataset_name, load_parameters, runtime_parameters, assess_accuracy))
+    return loop.run_until_complete(run_async(service, input_dataset_paths, input_dataset_directory, output_dataset_directory, output_dataset_paths, split_dataset_name, load_parameters, runtime_parameters, assess_accuracy, profile_processing_to_file))
