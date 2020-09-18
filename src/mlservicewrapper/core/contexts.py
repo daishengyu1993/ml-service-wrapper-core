@@ -58,7 +58,7 @@ class CollectingProcessContext(ProcessContext):
 class EnvironmentVariableServiceContext(ServiceContext):
     def __init__(self, prefix: str, default_values: dict = None):
         self.__prefix = prefix
-        self.__default_values = default_values or dict()
+        self.__default_values = default_values
     
     def get_parameter_value(self, name: str, required: bool = True, default: str = None) -> str:
         NameValidator.raise_if_invalid(name)
@@ -67,7 +67,7 @@ class EnvironmentVariableServiceContext(ServiceContext):
         if ev:
             return ev
 
-        if name in self.__default_values:
+        if self.__default_values is not None and name in self.__default_values:
             return self.__default_values[name]
 
         if required and default is None:
