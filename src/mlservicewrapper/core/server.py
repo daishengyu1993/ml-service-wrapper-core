@@ -9,7 +9,22 @@ import inspect
 from .contexts import ServiceContext, EnvironmentVariableServiceContext, ProcessContext
 from .services import Service
 
-__all__ = ["ServerInstance"]
+__all__ = ["ServerInstance", "DatasetSpec", "ParameterSpec", "ServiceInfo"]
+
+class DatasetSpec(typing.TypedDict):
+    required: bool
+    datasetType: str
+    itemSchema: dict
+    description: str
+
+class ParameterSpec(typing.TypedDict):
+    required: bool
+    type_: str
+    description: str
+
+class ServiceInfo(typing.TypedDict):
+    name: str
+    version: str
 
 class ServerInstance:
     def __init__(self, config_path: str = None):
@@ -36,10 +51,53 @@ class ServerInstance:
 
         self.__parameters = config.get("parameters")
         self.__host_configs = config.get("host")
+
+        self.__schema = config.get("schema")
+        self.__info = config.get("info")
         
         self.__service: Service = None
 
+    def get_info(self) -> ServiceInfo:
+        return self.__info
+
+    def __get_parameters_specs(self, step: str) -> typing.Dict[str, DatasetSpec]:
+        if self.__schema is None:
+            return dict()
+
+        datasets = self.__schema.get("parameters")
+
+        if datasets is None:
+            return dict()
+
+        return datasets.get(step, dict())
+        
+    def get_load_parameter_specs(self) -> typing.Dict[str, ParameterSpec]:
+        return self.__get_parameters_specs("load")
+        
+    def get_process_parameter_specs(self) -> typing.Dict[str, ParameterSpec]:
+        return self.__get_parameters_specs("process")
+        
+    def __get_dataset_specs(self, direction: str) -> typing.Dict[str, DatasetSpec]:
+        if self.__schema is None:
+            return dict()
+
+        datasets = self.__schema.get("datasets")
+
+        if datasets is None:
+            return dict()
+
+        return datasets.get(direction, dict())
+        
+    def get_input_dataset_specs(self) -> typing.Dict[str, DatasetSpec]:
+        return self.__get_dataset_specs("input")
+
+    def get_output_dataset_specs(self) -> typing.Dict[str, DatasetSpec]:
+        return self.__get_dataset_specs("output")
+
     def get_host_config_section(self, name: str) -> dict:
+        if self.__host_configs is None:
+            return None
+        
         return self.__host_configs.get(name)
 
     def get_parameters(self) -> dict or None:
