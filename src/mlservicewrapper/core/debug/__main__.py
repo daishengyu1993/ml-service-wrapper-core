@@ -39,20 +39,12 @@ parser.add_argument('--profile-processing-to-file', dest='profile_processing_to_
 
 args = parser.parse_args()
 
-service, config_params = server.get_service_instance(args.config)
+instance = server.ServerInstance(args.config, args.load_params)
 
-load_params = dict()
-
-if config_params:
-    load_params.update(config_params)
-
-if args.load_params:
-    load_params.update(args.load_params)
-    
 local.run(
-    service,
+    instance,
 
-    load_parameters=args.load_params,
+    load_parameters=instance.get_parameters(),
     runtime_parameters=args.runtime_parameters,
 
     input_dataset_paths=args.input_paths,
@@ -67,3 +59,5 @@ local.run(
 
     profile_processing_to_file=args.profile_processing_to_file
 )
+
+instance.dispose()

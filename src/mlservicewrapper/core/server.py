@@ -27,7 +27,7 @@ class ServiceInfo(typing.TypedDict):
     version: str
 
 class ServerInstance:
-    def __init__(self, config_path: str = None):
+    def __init__(self, config_path: str = None, load_params_override: dict = None):
 
         if not config_path:
             config_path = os.environ.get("SERVICE_CONFIG_PATH", "./service/config.json")
@@ -49,7 +49,15 @@ class ServerInstance:
         if self.__class_name is None and self.__service_instance_name is None:
             raise ValueError("Either className or serviceInstanceName must be specified in the configuration file!")
 
-        self.__parameters = config.get("parameters")
+        self.__parameters = dict()
+        config_parameters = config.get("parameters")
+
+        if config_parameters is not None:
+            self.__parameters.update(config_parameters)
+
+        if load_params_override is not None:
+            self.__parameters.update(load_params_override)
+        
         self.__host_configs = config.get("host")
 
         self.__schema = config.get("schema")
